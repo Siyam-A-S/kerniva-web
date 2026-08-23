@@ -1,6 +1,6 @@
 # Kerniva website
 
-Marketing site and in-browser product simulation for [kerniva.app](https://kerniva.app). Vite + React 19 + TypeScript, deployed as a static site to S3 + CloudFront.
+Marketing site for [kerniva.app](https://kerniva.app) and the nginx packaging that serves the public "Try Kerniva" simulation at `/try`. Vite + React 19 + TypeScript.
 
 ```bash
 mise install          # node 24, pnpm 10.14, opentofu

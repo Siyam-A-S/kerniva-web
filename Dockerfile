@@ -14,6 +14,7 @@ RUN pnpm build
 
 FROM nginx:1.27-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY kerniva-proxy.inc /etc/nginx/kerniva-proxy.inc
 COPY --from=build /site/dist /srv/site
 COPY --from=try /srv/try /srv/try
 EXPOSE 80
