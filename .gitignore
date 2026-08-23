@@ -1,0 +1,11 @@
+node_modules
+dist
+.turbo
+.env
+.env.local
+.claude/
+*.tfplan
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate*
+tsconfig.tsbuildinfo

@@ -1,0 +1,37 @@
+{
+  "name": "@kerniva/website",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Marketing site and product simulation for kerniva.app.",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@10.14.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port ${KERNIVA_SITE_PORT:-4180}",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --port ${KERNIVA_SITE_PORT:-4180}",
+    "check": "tsc -b --pretty false",
+    "lint": "tsc -b --pretty false",
+    "test": "vitest run --passWithNoTests",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.2",
+    "vitest": "^3.2.4"
+  }
+}
