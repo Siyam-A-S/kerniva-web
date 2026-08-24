@@ -24,18 +24,18 @@ All primary CTAs point to `/waitlist` (`src/pages/waitlist.tsx` + `components/wa
 - **`/try`** — the real thing: a full Kerniva stack in sandbox mode built from the monorepo's `try-kerniva-simulation` branch (images `kerniva-api`/`kerniva-worker`/`kerniva-try-web`, compose in `../kerniva/infra/coolify/`). When re-enabling it, restore the nginx proxy + rate limits, `kerniva-proxy.inc`, the Dockerfile `TRY_IMAGE` stage, and the workflow `try_tag` input from commit `ec6f2df`, and switch CTAs back to plain `<a href="/try">` (not `<Link>` — nginx must intercept before the SPA).
 - **`src/demo/`** — the scripted, client-only preview (`model.ts` = data model + keyword-matched agent, `demo-page.tsx` = reducer where every action appends to a project event log). Currently not routed but kept compiling. Preserve the product rule there: agents propose, only the driver approves, artifacts appear only after approval, assets above the project's max tier are excluded from context.
 
-## Hosting (current): Coolify + Cloudflare, one image
+## Hosting (current): Coolify + Cloudflare, build-from-source
 
 ```
 Cloudflare (proxied DNS, WAF, rate limits, cache)
   └─ Coolify/Traefik on one VM
-       └─ docker-compose resource from ../kerniva/infra/coolify/docker-compose.yml
-            web  = ghcr.io/siyam-a-s/kerniva-site   ← built from THIS repo's Dockerfile
-            (simulation services stay in the compose file but serve nothing public while /try is parked)
+       └─ application built FROM THIS REPO by Coolify's GitHub App
+            (build pack: Dockerfile · port 80 · domain https://kerniva.app)
 ```
 
-- `Dockerfile`: builds the site and ships `dist/` in `nginx:1.27-alpine` with `nginx.conf`. Static only — no simulation bundle, no API proxy.
-- `.github/workflows/deploy-coolify.yml`: on push to `main`, builds and pushes `kerniva-site:latest` + `:<sha>` to GHCR, then hits `COOLIFY_WEBHOOK_URL` (repo variable) with `COOLIFY_TOKEN` (secret).
+- Deploys are **build-from-source**: the Coolify GitHub App watches this repo and rebuilds the `Dockerfile` on push to `main` — no registry in the loop. The GitHub App needs Coolify's dashboard reachable by GitHub (instance domain, e.g. `https://coolify.kerniva.app`) or auto-deploy webhooks won't fire.
+- `Dockerfile`: builds the site and ships `dist/` in `nginx:1.27-alpine` with `nginx.conf`. Static only — no simulation bundle, no API proxy. Use the Dockerfile build pack (not Static/nixpacks): the nginx config carries the security headers, CSP, and www redirect.
+- `.github/workflows/deploy-coolify.yml`: manual-only fallback that publishes `ghcr.io/siyam-a-s/kerniva-site` for a registry-based deploy. The monorepo's `../kerniva/infra/coolify/docker-compose.yml` still references that image for when the full simulation stack returns.
 - `nginx.conf`: security headers + CSP declared once via maps (server-level `add_header` is dropped in any location that adds its own — keep it that way), `www` → apex redirect, SPA fallback.
 - CSP allows only self, Google Fonts, inline styles, and `data:`/`blob:` images. Adding any external script, image, or fetch target means editing the CSP in **both** `nginx.conf` and `infra/opentofu/main.tf`.
 - Cloudflare configuration (DNS proxied, Full-strict TLS, WAF + Bot Fight Mode, rate-limit rules, cache rules, firewall allowing only Cloudflare IPs to the origin) is documented in `../kerniva/infra/coolify/README.md` §3 — it is manual, not in code.

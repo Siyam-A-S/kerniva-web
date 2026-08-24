@@ -1,11 +1,10 @@
 name: site image (Coolify)
 
-# Builds the kerniva.app image (static site; the simulation is behind a
-# waitlist) and publishes it to GHCR; Coolify redeploys on the webhook. The
-# AWS/CloudFront workflow (deploy.yml) stays as a rollback path.
+# Manual fallback: builds the kerniva.app image (static site) and publishes
+# it to GHCR. Not used by the normal deploy path — Coolify's GitHub App
+# builds this repo's Dockerfile from source on push. Keep for a registry-
+# based rollback or a future move off build-from-source.
 on:
-  push:
-    branches: [main]
   workflow_dispatch: {}
 
 permissions:
