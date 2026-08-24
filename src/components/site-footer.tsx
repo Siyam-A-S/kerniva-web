@@ -29,10 +29,7 @@ export function SiteFooter() {
                 <Link to="/pricing">Pricing</Link>
               </li>
               <li>
-                <a href="/try">Live simulation</a>
-              </li>
-              <li>
-                <Link to="/demo">Scripted preview (no backend)</Link>
+                <Link to="/waitlist">Simulation waitlist</Link>
               </li>
             </ul>
           </div>

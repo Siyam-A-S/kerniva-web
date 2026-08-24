@@ -8,14 +8,13 @@ export function SiteLayout() {
   useEffect(() => {
     window.scrollTo({ top: 0 });
   }, [pathname]);
-  const isDemo = pathname.startsWith("/demo");
   return (
     <>
       <SiteHeader />
       <main>
         <Outlet />
       </main>
-      {!isDemo && <SiteFooter />}
+      <SiteFooter />
     </>
   );
 }

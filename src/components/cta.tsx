@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 export function Cta({
   title = "See Kerniva on your own material",
-  body = "Book a working session with our team, or open the live simulation: a real Kerniva workspace of your own, for two hours, no account needed.",
+  body = "Book a working session with our team, or join the waitlist for the live simulation: a real Kerniva workspace of your own, no account needed.",
 }: {
   title?: string;
   body?: string;
@@ -19,9 +19,9 @@ export function Cta({
             <Link to="/contact" className="btn btn--secondary">
               Book a session
             </Link>
-            <a href="/try" className="btn btn--primary">
-              Open the simulation
-            </a>
+            <Link to="/waitlist" className="btn btn--primary">
+              Join the waitlist
+            </Link>
           </div>
         </div>
       </div>

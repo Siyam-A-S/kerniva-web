@@ -1,16 +1,12 @@
 name: site image (Coolify)
 
-# Builds the kerniva.app image (site + simulation) and publishes it to GHCR;
-# Coolify redeploys on the webhook. The AWS/CloudFront workflow (deploy.yml)
-# stays as a rollback path and is no longer triggered automatically.
+# Builds the kerniva.app image (static site; the simulation is behind a
+# waitlist) and publishes it to GHCR; Coolify redeploys on the webhook. The
+# AWS/CloudFront workflow (deploy.yml) stays as a rollback path.
 on:
   push:
     branches: [main]
-  workflow_dispatch:
-    inputs:
-      try_tag:
-        description: "kerniva-try-web tag to bundle"
-        default: latest
+  workflow_dispatch: {}
 
 permissions:
   contents: read
@@ -33,7 +29,6 @@ jobs:
         with:
           context: .
           push: true
-          build-args: TRY_IMAGE=ghcr.io/${{ steps.meta.outputs.owner }}/kerniva-try-web:${{ github.event.inputs.try_tag || 'latest' }}
           tags: |
             ghcr.io/${{ steps.meta.outputs.owner }}/kerniva-site:latest
             ghcr.io/${{ steps.meta.outputs.owner }}/kerniva-site:${{ github.sha }}

@@ -34,7 +34,7 @@ export function PrivacyPage() {
       <PageHeader
         eyebrow="Privacy"
         title="What the simulation does with your data."
-        lede="The public simulation at kerniva.app/try is a real Kerniva workspace that is deliberately disposable. This note says exactly what is stored, for how long, and who can see it."
+        lede="The public simulation (currently behind a waitlist) is a real Kerniva workspace that is deliberately disposable. This note says exactly what will be stored, for how long, and who can see it when it opens."
       />
       <section className="section">
         <div className="container grid grid--2">

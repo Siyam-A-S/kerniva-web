@@ -28,9 +28,9 @@ export function SiteHeader() {
           <Link to="/contact" className="btn btn--secondary btn--sm">
             Talk to sales
           </Link>
-          <a href="/try" className="btn btn--primary btn--sm">
-            Try the workspace
-          </a>
+          <Link to="/waitlist" className="btn btn--primary btn--sm">
+            Join the waitlist
+          </Link>
           <button
             className="menu-toggle"
             aria-label="Toggle navigation"

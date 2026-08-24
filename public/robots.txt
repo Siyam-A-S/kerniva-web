@@ -1,11 +1,6 @@
-# Marketing pages are indexable. The simulation (/try) and the scripted
-# preview (/demo) are interactive surfaces with no SEO value and a model
-# budget behind them: keep every crawler out of them.
+# Marketing pages are indexable. /demo and /try are parked on the waitlist.
 User-agent: *
 Allow: /
-Disallow: /try
-Disallow: /try/
-Disallow: /demo
 
 # AI training / answer-engine crawlers: no access at all.
 User-agent: GPTBot

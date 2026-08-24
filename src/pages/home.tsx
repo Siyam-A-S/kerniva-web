@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Cta } from "../components/cta";
+import { WaitlistForm } from "../components/waitlist-form";
 
 const pillars = [
   {
@@ -76,9 +77,9 @@ export function HomePage() {
             every decision governed and auditable.
           </p>
           <div className="hero__actions">
-            <a href="/try" className="btn btn--primary">
-              Try the live simulation
-            </a>
+            <Link to="/waitlist" className="btn btn--primary">
+              Join the simulation waitlist
+            </Link>
             <Link to="/product" className="btn btn--secondary">
               See how it works
             </Link>
@@ -103,35 +104,25 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="section">
-        <div className="container">
-          <span className="eyebrow">Try Kerniva</span>
-          <h2 style={{ fontSize: 34, marginBottom: 12, maxWidth: "26ch" }}>
-            A real workspace of your own, in one click.
-          </h2>
-          <p className="lede" style={{ marginBottom: 28, maxWidth: "62ch" }}>
-            The simulation is not a video: it is Kerniva itself, running a clean project created for
-            you the moment you open it. Upload a document, ask the brain, drive a Relay, download
-            the deliverable.
-          </p>
-          <div className="grid grid--3">
-            {sandboxFacts.map(([t, b]) => (
-              <div className="card" key={t}>
-                <h3>{t}</h3>
-                <p>{b}</p>
-              </div>
-            ))}
+      <section className="section" id="waitlist">
+        <div className="container split" style={{ alignItems: "center" }}>
+          <div>
+            <span className="eyebrow">Try Kerniva</span>
+            <h2 style={{ fontSize: 34, marginBottom: 12, maxWidth: "26ch" }}>
+              A real workspace of your own — opening soon.
+            </h2>
+            <p className="lede" style={{ marginBottom: 20 }}>
+              The simulation is not a video: it is Kerniva itself, running a clean project created
+              for you the moment you open it. We are opening access in small waves — join the
+              waitlist and you will get a workspace in the next one.
+            </p>
+            <ul className="feature-list">
+              {sandboxFacts.map(([t]) => (
+                <li key={t}>{t}</li>
+              ))}
+            </ul>
           </div>
-          <p className="notice" style={{ marginTop: 20 }}>
-            Files you upload stay in your sandbox only. They are deleted when it ends (two hours
-            idle) and the whole simulation is wiped every night at 03:00 UTC. Please don&apos;t
-            upload confidential material — see our <Link to="/privacy">privacy note</Link>.
-          </p>
-          <div className="hero__actions" style={{ marginTop: 24 }}>
-            <a href="/try" className="btn btn--primary">
-              Open the simulation
-            </a>
-          </div>
+          <WaitlistForm />
         </div>
       </section>
 

@@ -1,6 +1,6 @@
 # Kerniva website
 
-Marketing site for [kerniva.app](https://kerniva.app) and the nginx packaging that serves the public "Try Kerniva" simulation at `/try`. Vite + React 19 + TypeScript.
+Marketing site for [kerniva.app](https://kerniva.app). Vite + React 19 + TypeScript. The "Try Kerniva" simulation is behind a waitlist for now; its `/try` packaging lives in git history (`ec6f2df`).
 
 ```bash
 mise install          # node 24, pnpm 10.14, opentofu
