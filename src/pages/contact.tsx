@@ -19,7 +19,7 @@ export function ContactPage() {
         <div className="container split" style={{ alignItems: "start" }}>
           <form className="form card" onSubmit={submit}>
             {sent ? (
-              <div className="notice">Thank you — we will reply within two business days.</div>
+              <div className="notice">Thank you. We will reply within two business days.</div>
             ) : (
               <>
                 <label>
@@ -58,13 +58,13 @@ export function ContactPage() {
             <h2 style={{ fontSize: 26, marginBottom: 12 }}>Direct lines</h2>
             <ul className="feature-list">
               <li>
-                Sales and partnerships — <a href="mailto:hello@kerniva.app">hello@kerniva.app</a>
+                Sales and partnerships: <a href="mailto:hello@kerniva.app">hello@kerniva.app</a>
               </li>
               <li>
-                Security reviews — <a href="mailto:security@kerniva.app">security@kerniva.app</a>
+                Security reviews: <a href="mailto:security@kerniva.app">security@kerniva.app</a>
               </li>
               <li>
-                Research programs — <a href="mailto:research@kerniva.app">research@kerniva.app</a>
+                Research programs: <a href="mailto:research@kerniva.app">research@kerniva.app</a>
               </li>
             </ul>
           </div>

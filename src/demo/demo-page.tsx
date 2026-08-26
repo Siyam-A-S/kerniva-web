@@ -138,7 +138,7 @@ function reducer(ws: Workspace, a: Action): Workspace {
           artifacts,
           messages: [
             ...p.messages,
-            { id: nextId("m"), who: "system", text: `${prop.title} — ${a.status}.` },
+            { id: nextId("m"), who: "system", text: `${prop.title}: ${a.status}.` },
           ],
           events,
         };
@@ -158,7 +158,7 @@ export function DemoPage() {
   const pending = project.proposals.filter((p) => p.status === "pending").length;
 
   useEffect(() => {
-    document.title = "Live simulation — Kerniva";
+    document.title = "Live simulation | Kerniva";
   }, []);
 
   function ask(text: string) {
@@ -344,7 +344,7 @@ function RelayView({
   return (
     <>
       <div className="row row--between">
-        <h2>Relay — work session</h2>
+        <h2>Relay: work session</h2>
         <small>Append-only transcript · AI is not in the send path</small>
       </div>
       <div className="panel panel--flat">
@@ -385,7 +385,7 @@ function RelayView({
             placeholder={
               project.driver === "You"
                 ? "Ask the agent or message your collaborators…"
-                : `${project.driver} holds the lease — you can still read and propose.`
+                : `${project.driver} holds the lease. You can still read and propose.`
             }
             disabled={thinking}
           />

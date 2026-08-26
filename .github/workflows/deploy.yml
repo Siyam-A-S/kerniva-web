@@ -1,6 +1,6 @@
 name: Deploy
 on:
-  workflow_dispatch: {} # rollback path only — kerniva.app is served by Coolify (deploy-coolify.yml)
+  workflow_dispatch: {} # rollback path only; kerniva.app is served by Coolify (deploy-coolify.yml)
 permissions:
   id-token: write
   contents: read

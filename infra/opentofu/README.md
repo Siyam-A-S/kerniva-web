@@ -12,4 +12,4 @@ tofu plan -var environment=nonprod -out=nonprod.tfplan
 tofu apply nonprod.tfplan
 ```
 
-`environment=production` serves `kerniva.app` and `www.kerniva.app`; any other value serves `<environment>.kerniva.app`. Deploys upload `dist/` to the bucket and invalidate the distribution — see `.github/workflows/deploy.yml`.
+`environment=production` serves `kerniva.app` and `www.kerniva.app`; any other value serves `<environment>.kerniva.app`. Deploys upload `dist/` to the bucket and invalidate the distribution; see `.github/workflows/deploy.yml`.

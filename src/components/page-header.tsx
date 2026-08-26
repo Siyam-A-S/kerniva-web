@@ -13,7 +13,7 @@ export function PageHeader({
   children?: ReactNode;
 }) {
   useEffect(() => {
-    document.title = `${title} — Kerniva`;
+    document.title = `${title} | Kerniva`;
   }, [title]);
   return (
     <section className="page-header">

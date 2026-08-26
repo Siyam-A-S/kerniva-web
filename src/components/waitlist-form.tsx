@@ -14,7 +14,7 @@ export function WaitlistForm({ compact = false }: { compact?: boolean }) {
   if (sent) {
     return (
       <div className="notice">
-        You are on the list — we will write to you when the simulation opens.
+        You are on the list. We will write to you when the simulation opens.
       </div>
     );
   }
@@ -33,12 +33,12 @@ export function WaitlistForm({ compact = false }: { compact?: boolean }) {
         <input name="org" autoComplete="organization" />
       </label>
       <label>
-        I want it for
-        <select name="interest" defaultValue="enterprise">
-          <option value="enterprise">Enterprise workspace</option>
-          <option value="research">Research &amp; thesis</option>
-          <option value="consulting">Consulting &amp; advisory</option>
-          <option value="other">Something else</option>
+        What kind of work does your team do?
+        <select name="work" defaultValue="consulting">
+          <option value="consulting">Consulting and advisory</option>
+          <option value="research">Research</option>
+          <option value="product">Product and project work</option>
+          <option value="other">Other</option>
         </select>
       </label>
       <button className="btn btn--primary" type="submit">

@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 
 export function Cta({
-  title = "See Kerniva on your own material",
-  body = "Book a working session with our team, or join the waitlist for the live simulation: a real Kerniva workspace of your own, no account needed.",
+  title = "Kerniva is best experienced with real work",
+  body = "See how Kerniva fits your team’s material and workflow through a tailored session, or explore a live workspace when early access opens.",
 }: {
   title?: string;
   body?: string;

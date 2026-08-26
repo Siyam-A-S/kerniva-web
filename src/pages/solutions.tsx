@@ -18,7 +18,7 @@ const solutions = [
     title: "Legal, audit, and compliance",
     lede: "Practices that must show exactly what the model saw and who approved the output.",
     points: [
-      "Privileged tier enforced at retrieval — not by prompt instruction",
+      "Privileged tier enforced at retrieval, not by prompt instruction",
       "Tamper-evident audit trail with SIEM export",
       "Consent-to-redaction on every handoff between colleagues",
       "Security questionnaire (SIG / CAIQ) and SOC 2 evidence on request",

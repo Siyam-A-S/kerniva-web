@@ -1,4 +1,4 @@
-# kerniva.app — static marketing site (the live simulation is behind a
+# kerniva.app static marketing site (the live simulation is behind a
 # waitlist for now; the /try packaging lives in git history).
 FROM node:24-bookworm-slim AS build
 WORKDIR /site

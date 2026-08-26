@@ -1,7 +1,7 @@
 name: site image (Coolify)
 
 # Manual fallback: builds the kerniva.app image (static site) and publishes
-# it to GHCR. Not used by the normal deploy path — Coolify's GitHub App
+# it to GHCR. Not used by the normal deploy path; Coolify's GitHub App
 # builds this repo's Dockerfile from source on push. Keep for a registry-
 # based rollback or a future move off build-from-source.
 on:

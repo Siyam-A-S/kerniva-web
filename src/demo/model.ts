@@ -85,7 +85,7 @@ export function clock() {
 export function initialWorkspace(): Workspace {
   const dach: Project = {
     id: "p-dach",
-    name: "Market entry — DACH",
+    name: "Market entry: DACH",
     domain: "enterprise",
     driver: "You",
     collaborators: ["M. Keller", "S. Okafor"],
@@ -93,14 +93,14 @@ export function initialWorkspace(): Workspace {
     assets: [
       {
         id: "a1",
-        title: "Board memo Q2 — expansion options",
+        title: "Board memo Q2: expansion options",
         kind: "docx",
         tier: "general",
         state: "graphed",
       },
       {
         id: "a2",
-        title: "Analyst report — DACH SaaS landscape (Berger)",
+        title: "Analyst report: DACH SaaS landscape (Berger)",
         kind: "pdf",
         tier: "general",
         state: "graphed",
@@ -130,7 +130,7 @@ export function initialWorkspace(): Workspace {
         at: "09:00:02",
         type: "project.created",
         actor: "you",
-        detail: "Market entry — DACH",
+        detail: "Market entry: DACH",
       },
       { seq: 2, at: "09:00:40", type: "asset.graphed", actor: "worker", detail: "4 assets" },
       { seq: 3, at: "09:01:10", type: "session.started", actor: "you", detail: "lease → you" },
@@ -139,7 +139,7 @@ export function initialWorkspace(): Workspace {
 
   const thesis: Project = {
     id: "p-thesis",
-    name: "PhD thesis — Federated learning privacy",
+    name: "PhD thesis: Federated learning privacy",
     domain: "research",
     driver: "You",
     collaborators: ["Prof. L. Andersson (supervisor)"],
@@ -147,28 +147,28 @@ export function initialWorkspace(): Workspace {
     assets: [
       {
         id: "r1",
-        title: "McMahan et al. 2017 — Communication-efficient learning",
+        title: "McMahan et al. 2017: Communication-efficient learning",
         kind: "pdf",
         tier: "general",
         state: "graphed",
       },
       {
         id: "r2",
-        title: "Abadi et al. 2016 — Deep learning with differential privacy",
+        title: "Abadi et al. 2016: Deep learning with differential privacy",
         kind: "pdf",
         tier: "general",
         state: "graphed",
       },
       {
         id: "r3",
-        title: "Kairouz et al. 2021 — Advances and open problems in FL",
+        title: "Kairouz et al. 2021: Advances and open problems in FL",
         kind: "pdf",
         tier: "general",
         state: "graphed",
       },
       {
         id: "r4",
-        title: "Experiment notebook — clinical partner data",
+        title: "Experiment notebook: clinical partner data",
         kind: "notes",
         tier: "restricted",
         state: "extracted",
@@ -258,13 +258,13 @@ export function runAgent(project: Project, input: string): AgentTurn {
         touches: s,
         proposal: {
           kind: "artifact",
-          title: "Board deck — DACH entry (6 slides)",
+          title: "Board deck: DACH entry (6 slides)",
           summary:
             "Executive summary, market sizing, competitive map, pricing (restricted), entry options, decision ask.",
           sources: names(s),
           artifact: {
             id: nextId("art"),
-            title: "Board deck — DACH entry",
+            title: "Board deck: DACH entry",
             format: "deck",
             maxTier: maxTier(s),
             sources: names(s),
@@ -318,13 +318,13 @@ export function runAgent(project: Project, input: string): AgentTurn {
       touches: s,
       proposal: {
         kind: "artifact",
-        title: "Go/No-Go Brief — DACH market entry (v1)",
+        title: "Go/No-Go Brief: DACH market entry (v1)",
         summary:
           "Four-section brief with a recommendation to proceed via a phased Germany-first entry.",
         sources: names(s),
         artifact: {
           id: nextId("art"),
-          title: "Go/No-Go Brief — DACH market entry",
+          title: "Go/No-Go Brief: DACH market entry",
           format: "brief",
           maxTier: maxTier(s),
           sources: names(s),
@@ -359,7 +359,7 @@ export function runAgent(project: Project, input: string): AgentTurn {
             },
             {
               heading: "Recommendation",
-              bullets: ["Go — phased, Germany first, partner channel for Austria and Switzerland"],
+              bullets: ["Go: phased, Germany first, partner channel for Austria and Switzerland"],
             },
           ],
         },
@@ -375,13 +375,13 @@ export function runAgent(project: Project, input: string): AgentTurn {
       touches: s,
       proposal: {
         kind: "artifact",
-        title: "Chapter 3 — Methodology (draft 1)",
+        title: "Chapter 3: Methodology (draft 1)",
         summary:
           "Threat model, privacy accounting, federated training protocol, and evaluation plan.",
         sources: names(s),
         artifact: {
           id: nextId("art"),
-          title: "Chapter 3 — Methodology",
+          title: "Chapter 3: Methodology",
           format: "chapter",
           maxTier: maxTier(s),
           sources: names(s),
@@ -440,12 +440,12 @@ export function runAgent(project: Project, input: string): AgentTurn {
     touches: s,
     proposal: {
       kind: "artifact",
-      title: "Literature review — DP in federated learning (v1)",
+      title: "Literature review: DP in federated learning (v1)",
       summary: "Structured review with a coverage matrix and two identified gaps.",
       sources: names(s),
       artifact: {
         id: nextId("art"),
-        title: "Literature review — Differential privacy in federated learning",
+        title: "Literature review: Differential privacy in federated learning",
         format: "review",
         maxTier: maxTier(s),
         sources: names(s),

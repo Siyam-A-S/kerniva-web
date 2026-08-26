@@ -20,7 +20,7 @@ const surfaces = [
   {
     name: "Artifacts",
     tag: "Output",
-    body: "Briefs, decks, reports, literature reviews, and chapters produced from sessions — each with provenance to sources, tiers, and the approving person. Export to DOCX, PPTX, PDF, or Markdown.",
+    body: "Briefs, decks, reports, literature reviews, and chapters produced from sessions, each with provenance to sources, tiers, and the approving person. Export to DOCX, PPTX, PDF, or Markdown.",
   },
   {
     name: "Cockpit",
@@ -30,7 +30,12 @@ const surfaces = [
   {
     name: "Tasks & Phases",
     tag: "Execution",
-    body: "Read-models derived from the event log. Phases, tasks, reminders, and handoffs stay in sync with what was actually approved — never what an agent merely suggested.",
+    body: "Read-models derived from the event log. Phases, tasks, reminders, and handoffs stay in sync with what was actually approved, never what an agent merely suggested.",
+  },
+  {
+    name: "Sensitivity-aware grounding",
+    tag: "Governance",
+    body: "Kerniva respects who can access each source, ensuring people and AI only work with the context they’re authorized to use.",
   },
 ];
 
@@ -40,7 +45,7 @@ const steps = [
     "Validate",
     "Policy envelope, sensitivity tiers, and skill contracts are checked automatically.",
   ],
-  ["Approve", "The session driver — a human — approves, requests changes, or rejects."],
+  ["Approve", "The session driver, a human, approves, requests changes, or rejects."],
   ["Commit", "The event is appended to the project log; every projection rebuilds from it."],
 ];
 
@@ -50,7 +55,7 @@ export function ProductPage() {
       <PageHeader
         eyebrow="Product"
         title="One governed workspace for conversation, knowledge, and output."
-        lede="Kerniva separates what people say, what the organization knows, and what the AI produces — then connects them through a single, auditable project log."
+        lede="Kerniva separates what people say, what the organization knows, and what the AI produces, then connects them through a single, auditable project log."
       />
       <section className="section">
         <div className="container">
@@ -90,7 +95,7 @@ export function ProductPage() {
             <div className="rule" />
             <h2>Skills as execution contracts.</h2>
             <p>
-              Every capability an agent can use — summarize, draft, extract, compare, cite — is
+              Every capability an agent can use (summarize, draft, extract, compare, cite) is
               declared as a skill with explicit inputs, allowed tools, model gating, and output
               schema. Teams can extend the catalog; administrators decide which skills each project
               may run.

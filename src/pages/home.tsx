@@ -6,79 +6,66 @@ import { WaitlistForm } from "../components/waitlist-form";
 const pillars = [
   {
     k: "01",
-    title: "Multiplayer by default",
-    body: "Work sessions with a shared, append-only transcript. One driver at a time, explicit handoffs, private forks when you need to think alone.",
+    title: "One shared project brain",
+    body: "Kerniva keeps research, files, AI sessions, and decisions connected to the project, and not scattered across individual tools and accounts.",
   },
   {
     k: "02",
-    title: "Agents propose, people decide",
-    body: "Every AI action lands as a proposal card — decision, plan, task, or draft. Nothing touches canonical project state until a human approves it.",
+    title: "Handoffs without starting over",
+    body: "When work changes hands, the next person inherits what was done, why decisions were made, and what needs to happen next (instead of spending hours decoding documentation).",
   },
   {
     k: "03",
-    title: "Artifacts, not just answers",
-    body: "Turn a conversation into a brief, a deck, a literature review, or a thesis chapter with provenance back to every source that informed it.",
-  },
-  {
-    k: "04",
-    title: "Sensitivity-aware grounding",
-    body: "Documents carry a tier — general, restricted, privileged. Retrieval and AI context respect it silently, per person, every time.",
+    title: "From shared context to finished work",
+    body: "Turn team and AI work into briefs, decks, reports, and other deliverables, with every supporting source connected.",
   },
 ];
 
-const audiences = [
+const audiences: Array<{ title: string; body: string; brand?: boolean }> = [
   {
-    title: "Enterprise knowledge teams",
-    body: "Strategy, product, and operations teams that need AI across confidential material without leaking it across the org.",
-    to: "/solutions",
+    title: "Consulting and advisory",
+    body: "Carry market research, interview notes, analyses, and draft decks to the next analyst, without another rebrief slowing down the engagement.",
+    brand: true,
   },
   {
-    title: "Regulated and advisory firms",
-    body: "Legal, audit, and consulting practices that need a tamper-evident record of who asked what, and what the model was allowed to see.",
-    to: "/solutions#legal",
+    title: "Strategy and operations",
+    body: "Keep business cases, market-entry research, operating assumptions, and leadership decisions connected as initiatives move across functions.",
   },
   {
-    title: "Research groups and thesis authors",
-    body: "Labs, supervisors, and graduate students running long-form research with a shared library, citations, and review gates.",
-    to: "/research",
+    title: "Research and intelligence",
+    body: "Build on source libraries, hypotheses, citations, and previous findings, without repeating searches or losing the evidence behind the research.",
+  },
+  {
+    title: "Risk, audit, and compliance",
+    body: "Connect evidence, control findings, reviewer comments, and approvals while keeping sensitive context limited to authorized people and agents.",
   },
 ];
 
-const sandboxFacts: Array<[string, string]> = [
-  [
-    "A clean project, just for you",
-    "Its own organisation, its own library, its own event log. Nothing from anyone else; nothing of yours visible to anyone else.",
-  ],
-  [
-    "Four colleagues with real clearances",
-    "Priya, Omar, Aisha and Viktor — partner to restricted reviewer. Switch between them and watch what the brain is allowed to say change.",
-  ],
-  [
-    "A generous model budget",
-    "Enough turns for a full guided session with a couple of documents. When it runs out, everything else keeps working.",
-  ],
+const earlyAccessPoints: string[] = [
+  "A workspace built around your team’s workflow",
+  "Guided onboarding directly with the founders",
+  "Early influence over what Kerniva becomes",
 ];
 
 export function HomePage() {
   useEffect(() => {
-    document.title = "Kerniva — Private multiplayer AI workspaces for sensitive teams";
+    document.title = "Kerniva: AI workspace for teams with no time to lose";
   }, []);
   return (
     <>
       <section className="hero">
         <div className="container">
-          <span className="eyebrow">Enterprise AI workspace</span>
+          <span className="eyebrow">Design-partner program</span>
           <h1>
-            The AI workspace where <span className="gradient-text">people stay in charge</span>.
+            AI workspace for teams with <span className="gradient-text">no time to lose</span>.
           </h1>
           <p className="lede">
-            Kerniva is a private, multiplayer workspace for teams that work on sensitive material.
-            Collaborate in real time, ground AI in your own library, generate artifacts — and keep
-            every decision governed and auditable.
+            Kerniva connects your team&apos;s research, files, AI sessions, and project decisions in
+            real time, so the next collaborator can continue without reconstructing context.
           </p>
           <div className="hero__actions">
             <Link to="/waitlist" className="btn btn--primary">
-              Join the simulation waitlist
+              Join the design-partner program
             </Link>
             <Link to="/product" className="btn btn--secondary">
               See how it works
@@ -107,17 +94,17 @@ export function HomePage() {
       <section className="section" id="waitlist">
         <div className="container split" style={{ alignItems: "center" }}>
           <div>
-            <span className="eyebrow">Try Kerniva</span>
+            <span className="eyebrow">Get early access</span>
             <h2 style={{ fontSize: 34, marginBottom: 12, maxWidth: "26ch" }}>
-              A real workspace of your own — opening soon.
+              Bring a real workflow. See what stops getting lost.
             </h2>
             <p className="lede" style={{ marginBottom: 20 }}>
-              The simulation is not a video: it is Kerniva itself, running a clean project created
-              for you the moment you open it. We are opening access in small waves — join the
-              waitlist and you will get a workspace in the next one.
+              We&apos;re opening Kerniva to a small group of teams. Bring one non-confidential
+              workflow and test how work moves between people and AI, without losing the research,
+              reasoning, and decisions behind it.
             </p>
             <ul className="feature-list">
-              {sandboxFacts.map(([t]) => (
+              {earlyAccessPoints.map((t) => (
                 <li key={t}>{t}</li>
               ))}
             </ul>
@@ -132,7 +119,7 @@ export function HomePage() {
           <h2 style={{ fontSize: 34, marginBottom: 40, maxWidth: "24ch" }}>
             Most AI tools are single-player and ungoverned. Serious work is neither.
           </h2>
-          <div className="grid grid--2">
+          <div className="grid grid--3">
             {pillars.map((p) => (
               <div className="card" key={p.k}>
                 <div className="card__icon">{p.k}</div>
@@ -148,7 +135,7 @@ export function HomePage() {
         <div className="container split">
           <div>
             <div className="rule" />
-            <h2>A project is the unit of work — and the unit of trust.</h2>
+            <h2>A project is the unit of work, and the unit of trust.</h2>
             <p>
               Each Kerniva project holds its own library, its own sessions, and its own append-only
               event log. The log is the truth; every view is a rebuildable projection of it. That
@@ -169,16 +156,13 @@ export function HomePage() {
 
       <section className="section section--subtle">
         <div className="container">
-          <span className="eyebrow">Built for</span>
-          <div className="grid grid--3" style={{ marginTop: 8 }}>
+          <span className="eyebrow">Built for analysts</span>
+          <div className="grid grid--2" style={{ marginTop: 8 }}>
             {audiences.map((a) => (
-              <Link to={a.to} className="card" key={a.title}>
+              <div className={`card${a.brand ? " card--brand" : ""}`} key={a.title}>
                 <h3>{a.title}</h3>
                 <p>{a.body}</p>
-                <p style={{ marginTop: 16, color: "var(--brand-a)", fontWeight: 600 }}>
-                  Learn more →
-                </p>
-              </Link>
+              </div>
             ))}
           </div>
         </div>
@@ -193,7 +177,7 @@ export function HomePage() {
             </div>
             <div className="stat">
               <strong>1</strong>
-              <span>single egress point for all model traffic</span>
+              <span>controlled gateway for all AI model traffic</span>
             </div>
             <div className="stat">
               <strong>0</strong>
@@ -201,7 +185,7 @@ export function HomePage() {
             </div>
             <div className="stat">
               <strong>100%</strong>
-              <span>of AI writes gated behind a human decision</span>
+              <span>of AI-generated changes require human approval</span>
             </div>
           </div>
         </div>
@@ -217,7 +201,7 @@ function HomePreview() {
     <div className="sim" style={{ minHeight: 0 }}>
       <div className="sim__topbar">
         <strong>Project</strong>
-        <span className="sim__badge">Market entry — DACH</span>
+        <span className="sim__badge">Market entry: DACH</span>
         <span className="spacer" />
         <small>Driver: A. Rahman · 2 collaborators</small>
       </div>
@@ -250,7 +234,7 @@ function HomePreview() {
           </div>
           <div className="proposal">
             <span className="proposal__kind">Artifact proposal</span>
-            <strong>Go/No-Go Brief — DACH market entry (v1)</strong>
+            <strong>Go/No-Go Brief: DACH market entry (v1)</strong>
             <small>
               Sources: Board memo Q2 · Analyst report (Berger) · Pricing model v3 (restricted)
             </small>
@@ -297,7 +281,7 @@ function HomePreview() {
 
 function EventLogPreview() {
   const rows: [string, string, string, string][] = [
-    ["14:02:11", "session.started", "a.rahman", "—"],
+    ["14:02:11", "session.started", "a.rahman", "sandbox project"],
     ["14:02:40", "grounding.resolved", "agent", "3 sources · max tier: restricted"],
     ["14:03:05", "artifact.proposed", "agent", "brief-v1"],
     ["14:06:22", "proposal.approved", "a.rahman", "brief-v1 → committed"],

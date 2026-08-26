@@ -12,7 +12,7 @@ const points: Array<[string, string]> = [
   ],
   [
     "Uploads are temporary",
-    "Files you upload stay in your sandbox only. They are deleted when the sandbox ends and the whole simulation — database, files, graphs — is rebuilt from scratch every night at 03:00 UTC. Please do not upload confidential material.",
+    "Files you upload stay in your sandbox only. They are deleted when the sandbox ends and the whole simulation (database, files, graphs) is rebuilt from scratch every night at 03:00 UTC. Please do not upload confidential material.",
   ],
   [
     "Model calls",
@@ -24,7 +24,7 @@ const points: Array<[string, string]> = [
   ],
   [
     "Questions",
-    "Write to privacy@kerniva.app. For the product itself — hosted in your own AWS account — see the security page.",
+    "Write to privacy@kerniva.app. For the product itself, hosted in your own AWS account, see the security page.",
   ],
 ];
 
@@ -49,7 +49,7 @@ export function PrivacyPage() {
       <section className="section section--tight">
         <div className="container">
           <p className="lede">
-            Looking for the enterprise posture — SSO, residency, audit? See{" "}
+            Looking for the enterprise posture: SSO, residency, audit? See{" "}
             <Link to="/security">Security</Link>.
           </p>
         </div>
