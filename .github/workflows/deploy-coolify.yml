@@ -1,10 +1,22 @@
 name: site image (Coolify)
 
-# Manual fallback: builds the kerniva.app image (static site) and publishes
-# it to GHCR. Not used by the normal deploy path; Coolify's GitHub App
-# builds this repo's Dockerfile from source on push. Keep for a registry-
-# based rollback or a future move off build-from-source.
+# Builds the kerniva.app image (static site) and publishes it to GHCR on
+# every push to main, then pokes Coolify to pull it.
+#
+# This exists because the Coolify GitHub App's auto-deploy webhook cannot
+# reach the instance: coolify.kerniva.app has no DNS record, so GitHub has
+# nowhere to deliver the push event. This path does not need DNS, because
+# the runner calls Coolify directly at whatever host COOLIFY_WEBHOOK_URL
+# names, a raw IP:port included.
+#
+# The notify step stays skipped until repo variable COOLIFY_WEBHOOK_URL and
+# secret COOLIFY_TOKEN are set, and Coolify only picks the image up once the
+# application is switched from the Dockerfile build pack to Docker Image
+# (ghcr.io/siyam-a-s/kerniva-site:latest). Until both are done this workflow
+# publishes an image that nothing consumes, which is harmless.
 on:
+  push:
+    branches: [main]
   workflow_dispatch: {}
 
 permissions:
