@@ -1,7 +1,12 @@
 .git
+.github
 node_modules
 dist
 infra
-.github
 *.md
 tsconfig.tsbuildinfo
+*.tfplan
+.terraform
+# Video masters and per-machine agent config: never part of a build.
+media-src
+.agents

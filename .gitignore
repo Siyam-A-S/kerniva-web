@@ -9,3 +9,10 @@ dist
 .terraform.lock.hcl
 terraform.tfstate*
 tsconfig.tsbuildinfo
+
+# Video masters: kept locally, never shipped or committed (see CLAUDE.md).
+media-src/
+
+# Local agent tooling, not project files.
+.agents/
+skills-lock.json
