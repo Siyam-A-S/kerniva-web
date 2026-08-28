@@ -54,7 +54,9 @@ export function SecurityPage() {
       <section className="section section--subtle">
         <div className="container">
           <span className="eyebrow">Compliance</span>
-          <h2 style={{ fontSize: 30, marginBottom: 16 }}>Evidence on request</h2>
+          <h2 className="h-section" style={{ fontSize: 30, marginBottom: 16 }}>
+            Evidence on request
+          </h2>
           <p className="lede" style={{ marginBottom: 24 }}>
             SOC 2 program in progress. We complete SIG and CAIQ questionnaires and provide
             architecture walkthroughs for enterprise security reviews.

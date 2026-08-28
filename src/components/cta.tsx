@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Corners } from "./blueprint";
 
 export function Cta({
   title = "Kerniva is best experienced with real work",
@@ -12,15 +13,16 @@ export function Cta({
       <div className="container">
         <div className="cta">
           <div>
-            <h2>{title}</h2>
+            <h2 className="h-section">{title}</h2>
             <p>{body}</p>
           </div>
           <div className="hero__actions">
-            <Link to="/contact" className="btn btn--secondary">
-              Book a session
-            </Link>
-            <Link to="/waitlist" className="btn btn--primary">
+            <Link to="/waitlist" className="btn btn--secondary btn--lg">
               Join the waitlist
+            </Link>
+            <Link to="/demo" className="btn btn--primary btn--lg blueprint">
+              <Corners />
+              Book a demo
             </Link>
           </div>
         </div>

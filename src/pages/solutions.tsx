@@ -50,7 +50,7 @@ export function SolutionsPage() {
           <div className="container split">
             <div>
               <div className="rule" />
-              <h2>{s.title}</h2>
+              <h2 className="h-section">{s.title}</h2>
               <p>{s.lede}</p>
             </div>
             <ul className="feature-list">

@@ -74,7 +74,7 @@ export function ProductPage() {
       <section className="section section--subtle">
         <div className="container">
           <span className="eyebrow">The governed protocol</span>
-          <h2 style={{ fontSize: 32, marginBottom: 36, maxWidth: "26ch" }}>
+          <h2 className="h-section" style={{ fontSize: 32, marginBottom: 36, maxWidth: "26ch" }}>
             Agents always propose. Humans decide. The log is truth.
           </h2>
           <div className="grid grid--4">
@@ -93,7 +93,7 @@ export function ProductPage() {
         <div className="container split">
           <div>
             <div className="rule" />
-            <h2>Skills as execution contracts.</h2>
+            <h2 className="h-section">Skills as execution contracts.</h2>
             <p>
               Every capability an agent can use (summarize, draft, extract, compare, cite) is
               declared as a skill with explicit inputs, allowed tools, model gating, and output

@@ -14,14 +14,16 @@ export function WaitlistPage() {
           <WaitlistForm />
           <div>
             <div className="rule" />
-            <h2 style={{ fontSize: 26, marginBottom: 12 }}>What you will get</h2>
+            <h2 className="h-section" style={{ fontSize: 26, marginBottom: 12 }}>
+              What you will get
+            </h2>
             <ul className="feature-list">
               <li>A clean project with a sample library, just for you, no account needed</li>
               <li>The real product: Relay, Library, proposals, Cockpit, the event log</li>
               <li>A generous model budget for a full guided session</li>
               <li>Everything disposable: your sandbox is wiped when it ends</li>
             </ul>
-            <p style={{ marginTop: 20, color: "var(--ink-2)" }}>
+            <p style={{ marginTop: 20, color: "var(--muted)" }}>
               Can&apos;t wait? A working session with the team is the fastest way to see Kerniva on
               your own material: <a href="mailto:hello@kerniva.app">hello@kerniva.app</a>.
             </p>

@@ -42,7 +42,7 @@ export function ResearchPage() {
         <div className="container split">
           <div>
             <div className="rule" />
-            <h2>Integrity by construction.</h2>
+            <h2 className="h-section">Integrity by construction.</h2>
             <p>
               Institutions are asking how AI was used. Kerniva answers that question with the event
               log: which sources were in context, which skill produced the draft, which model was

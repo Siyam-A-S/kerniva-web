@@ -1,45 +1,146 @@
-import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, NavLink, useLocation } from "react-router-dom";
+import { AnimatePresence, motion, spring } from "motion/react";
 import { Logo } from "./logo";
+import { Corners } from "./blueprint";
+import { SectionLink } from "./section-link";
+import { riseIn } from "./transitions";
 
+/**
+ * Sticky, blurred bar over a hairline. Most entries point at sections of the
+ * landing page, as the design does; Pricing keeps its own route, since the
+ * landing has no pricing section.
+ */
 const links = [
-  ["/product", "Product"],
-  ["/solutions", "Solutions"],
-  ["/research", "Research"],
-  ["/security", "Security"],
-  ["/pricing", "Pricing"],
-  ["/about", "Company"],
+  { hash: "product", label: "Product" },
+  { hash: "how", label: "Solutions" },
+  { hash: "research", label: "Research" },
+  { hash: "security", label: "Security" },
+  { to: "/pricing", label: "Pricing" },
+  { hash: "company", label: "Company" },
+  { hash: "faq", label: "FAQ" },
 ] as const;
+
+/** The width below which the row collapses into the drop panel. */
+const COMPACT = "(max-width: 1080px)";
+
+function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
+  return (
+    <>
+      {links.map((link) =>
+        "to" in link ? (
+          <NavLink
+            key={link.label}
+            to={link.to}
+            onClick={onNavigate}
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            {link.label}
+          </NavLink>
+        ) : (
+          <SectionLink key={link.label} hash={link.hash} onClick={onNavigate}>
+            {link.label}
+          </SectionLink>
+        ),
+      )}
+    </>
+  );
+}
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
+  const headerRef = useRef<HTMLElement | null>(null);
+  const close = () => setOpen(false);
+
+  // While the panel is open it can be dismissed three ways, and it closes
+  // itself if the viewport grows past the breakpoint that hides the toggle.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const onPointerDown = (e: PointerEvent) => {
+      if (!headerRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const mq = window.matchMedia(COMPACT);
+    const onBreakpoint = () => {
+      if (!mq.matches) setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("pointerdown", onPointerDown);
+    mq.addEventListener("change", onBreakpoint);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("pointerdown", onPointerDown);
+      mq.removeEventListener("change", onBreakpoint);
+    };
+  }, [open]);
+
   return (
-    <header className="site-header">
-      <div className="container site-header__inner">
+    <motion.header
+      ref={headerRef}
+      className="site-header"
+      initial={{ opacity: 0, y: -16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={riseIn(0.05, 0.7)}
+    >
+      <div className="site-header__inner">
         <Logo />
-        <nav className={`nav${open ? " open" : ""}`} onClick={() => setOpen(false)}>
-          {links.map(([to, label]) => (
-            <NavLink key={to} to={to}>
-              {label}
-            </NavLink>
-          ))}
+
+        <nav className="site-nav">
+          <NavLinks />
         </nav>
+
         <div className="header-actions">
-          <Link to="/contact" className="btn btn--secondary btn--sm">
-            Talk to sales
-          </Link>
-          <Link to="/waitlist" className="btn btn--primary btn--sm">
+          <Link
+            to="/waitlist"
+            className="btn btn--primary blueprint btn--hide-xs"
+            aria-current={pathname === "/waitlist" ? "page" : undefined}
+          >
+            <Corners />
             Join the waitlist
           </Link>
-          <button
-            className="menu-toggle"
-            aria-label="Toggle navigation"
-            onClick={() => setOpen((v) => !v)}
-          >
-            ☰
-          </button>
+          <Link to="/contact" className="btn btn--secondary btn--tinted btn--hide-sm">
+            Talk to sales
+          </Link>
+          <Link to="/demo" className="btn btn--primary blueprint">
+            <Corners />
+            Book a demo
+          </Link>
         </div>
+
+        <button
+          type="button"
+          className="menu-toggle"
+          aria-label="Toggle navigation"
+          aria-expanded={open}
+          aria-controls="site-nav-panel"
+          onClick={() => setOpen((v) => !v)}
+        >
+          <span />
+        </button>
       </div>
-    </header>
+
+      {/* AnimatePresence sits outside the condition: inside it, it would
+          unmount with the panel and the exit animation could never play. */}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.nav
+            key="panel"
+            id="site-nav-panel"
+            className="site-nav-panel"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ type: spring, stiffness: 420, damping: 34 }}
+          >
+            <div>
+              <NavLinks onNavigate={close} />
+            </div>
+          </motion.nav>
+        )}
+      </AnimatePresence>
+    </motion.header>
   );
 }

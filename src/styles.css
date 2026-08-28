@@ -1,26 +1,81 @@
 /*
- * Kerniva marketing theme.
+ * Kerniva marketing theme: the "Industry" blueprint system, re-themed.
  *
- * White working surfaces, near-black ink, and a two-stop brand gradient
- * (plum #532671 → navy #1a1f4d) used only for the mark, primary buttons,
- * and thin rules. Type is Inter on a compact, editorial scale.
+ * Ported from the design handoff's two stylesheets, which are the source of
+ * truth for every value here: industry-styles.css (base system) with
+ * kerniva-theme.css layered over it (brand ramps). Square corners, 1px
+ * hairlines, "+" registration crosses, Barlow Condensed over Barlow.
+ *
+ * Nothing in this file loads a third-party script or image, so the strict CSP
+ * in nginx.conf and infra/opentofu/main.tf stays untouched.
  */
 :root {
+  --color-bg: #f2f2f3;
+  --color-surface: #e9e9ea;
+  --color-text: #2e1157;
+  --color-accent: #5b0077;
+  --color-accent-2: #31407a;
+  --color-divider: color-mix(in srgb, #0a1b4d 18%, transparent);
+
+  --color-neutral-100: #f5f5f8;
+  --color-neutral-200: #e7e7ea;
+  --color-neutral-300: #d4d4d7;
+  --color-neutral-400: #b7b7ba;
+  --color-neutral-500: #98989b;
+  --color-neutral-600: #7a7a7d;
+  --color-neutral-700: #5d5d60;
+  --color-neutral-800: #424244;
+  --color-neutral-900: #2b2b2d;
+
+  --color-accent-100: #f9eefc;
+  --color-accent-200: #f0d7f9;
+  --color-accent-300: #e0b3f0;
+  --color-accent-400: #c07fd8;
+  --color-accent-500: #a250bf;
+  --color-accent-600: #6e2387;
+  --color-accent-700: #4d0064;
+  --color-accent-800: #38004a;
+  --color-accent-900: #250031;
+
+  --color-accent-2-100: #eef2fe;
+  --color-accent-2-200: #d8e1fb;
+  --color-accent-2-300: #b6c6f2;
+  --color-accent-2-400: #8ba1dd;
+  --color-accent-2-500: #6379bd;
+  --color-accent-2-600: #47599a;
+  --color-accent-2-700: #31407a;
+  --color-accent-2-800: #1d2a5e;
+  --color-accent-2-900: #0a1b4d;
+
+  --font-heading: "Barlow Condensed", system-ui, sans-serif;
+  --font-heading-weight: 600;
+  --font-body: Barlow, system-ui, sans-serif;
+
+  --space-1: 3.4px;
+  --space-2: 6.8px;
+  --space-3: 10.2px;
+  --space-4: 13.6px;
+  --space-6: 20.4px;
+  --space-8: 27.2px;
+
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #0a1b4d 14%, transparent);
+  --shadow-md: 0 3px 10px color-mix(in srgb, #0a1b4d 16%, transparent);
+  --shadow-lg: 0 12px 32px color-mix(in srgb, #0a1b4d 22%, transparent);
+
+  /* Page frame. The handoff's two screens disagree (1200 vs 1160); unified
+     here so the sticky bar's gutter math is single sourced. */
+  --max: 1200px;
+  --gutter: clamp(20px, 5vw, 72px);
+
+  /* Kept so the parked simulation in src/demo/ still resolves its colours. */
   --brand-a: #532671;
   --brand-b: #1a1f4d;
   --brand-gradient: linear-gradient(135deg, var(--brand-a) 0%, var(--brand-b) 100%);
-
-  --bg: #ffffff;
-  --bg-subtle: #f7f7fa;
-  --panel: #ffffff;
-  --line: #e6e6ee;
-  --line-strong: #cfcfdc;
-  --ink: #13132a;
-  --ink-2: #3a3a55;
-  --muted: #6b6b85;
-  --accent: var(--brand-b);
-  --accent-soft: #eeeaf3;
-
+  --ink: var(--color-text);
+  --line: var(--color-divider);
+  --line-strong: color-mix(in srgb, var(--color-text) 35%, transparent);
+  --muted: color-mix(in srgb, var(--color-text) 60%, transparent);
+  --accent-soft: var(--color-accent-100);
   --ok: #1f7a4d;
   --ok-soft: #e4f3ea;
   --warn: #a15c0c;
@@ -28,28 +83,25 @@
   --danger: #b3261e;
   --danger-soft: #fbe9e7;
 
-  --radius: 10px;
-  --radius-lg: 16px;
-  --shadow: 0 1px 2px rgba(19, 19, 42, 0.05), 0 8px 24px rgba(19, 19, 42, 0.06);
-  --max: 1160px;
-
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    sans-serif;
-  font-size: 16px;
+  font-family: var(--font-body);
+  font-size: 15px;
   line-height: 1.55;
-  color: var(--ink);
-  background: var(--bg);
+  color: var(--color-text);
+  background: var(--color-bg);
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
 }
 
-* {
+/* ---------- Base ---------- */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+  /* Anchor targets clear the sticky bar. */
+  scroll-padding-top: 88px;
 }
 html,
 body,
@@ -58,28 +110,24 @@ body,
   min-height: 100%;
 }
 body {
-  background: var(--bg);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-weight: 400;
   min-width: 320px;
-}
-a {
-  color: inherit;
-  text-decoration: none;
-}
-button,
-input,
-textarea,
-select {
-  font: inherit;
-  color: inherit;
+  text-wrap: pretty;
 }
 h1,
 h2,
 h3,
-h4 {
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
   margin: 0;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  font-weight: 700;
 }
 p {
   margin: 0;
@@ -89,313 +137,634 @@ ul {
   padding: 0;
   list-style: none;
 }
+a {
+  color: var(--color-accent-700);
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+a:hover {
+  color: var(--color-accent-800);
+}
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+img {
+  display: block;
+  max-width: 100%;
+}
+figure {
+  margin: 0;
+}
 code {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 0.9em;
 }
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+.text-muted {
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
 
-/* ---------- Layout primitives ---------- */
+/* ---------- Blueprint frame ----------
+   A hairline box with four "+" registration crosses overhanging the corners.
+   The signature object of the system: used for plates, mocks, and buttons. */
+.blueprint {
+  position: relative;
+  border: 1px solid var(--color-divider);
+  border-radius: 0;
+}
+.blueprint > .corner {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+  pointer-events: none;
+}
+.blueprint > .corner::before,
+.blueprint > .corner::after {
+  content: "";
+  position: absolute;
+  background: currentColor;
+}
+.blueprint > .corner::before {
+  left: 5px;
+  top: 0;
+  width: 1px;
+  height: 100%;
+}
+.blueprint > .corner::after {
+  top: 5px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+}
+.blueprint > .corner.tl {
+  top: -6px;
+  left: -6px;
+}
+.blueprint > .corner.tr {
+  top: -6px;
+  right: -6px;
+}
+.blueprint > .corner.bl {
+  bottom: -6px;
+  left: -6px;
+}
+.blueprint > .corner.br {
+  bottom: -6px;
+  right: -6px;
+}
+
+/* ---------- Buttons ----------
+   Both naming schemes are live: the handoff markup uses .btn-primary, the
+   pages carried over from the previous design use .btn--primary. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--color-text);
+  background: transparent;
+  border: 1px solid var(--color-divider);
+  border-radius: 0;
+  padding: var(--space-2) calc(var(--space-3) * 1.2);
+  white-space: nowrap;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+.btn svg {
+  display: block;
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-primary,
+.btn--primary {
+  background: var(--color-accent);
+  color: var(--color-bg);
+  border-color: var(--color-accent);
+}
+.btn-primary:hover,
+.btn--primary:hover {
+  background: var(--color-accent-600);
+  border-color: var(--color-accent-600);
+  color: var(--color-bg);
+}
+.btn-primary:active,
+.btn--primary:active {
+  background: var(--color-accent-700);
+  border-color: var(--color-accent-700);
+}
+.btn-secondary,
+.btn--secondary {
+  border-color: var(--color-divider);
+}
+.btn-secondary:hover,
+.btn--secondary:hover {
+  background: color-mix(in srgb, var(--color-text) 7%, transparent);
+  color: var(--color-text);
+}
+.btn-secondary:active,
+.btn--secondary:active {
+  background: color-mix(in srgb, var(--color-text) 14%, transparent);
+}
+.btn-ghost,
+.btn--ghost {
+  color: var(--color-accent);
+  border-color: transparent;
+  padding-inline: var(--space-1);
+}
+.btn-ghost:hover,
+.btn--ghost:hover {
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  color: var(--color-accent);
+}
+.btn-ghost:active,
+.btn--ghost:active {
+  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+}
+.btn-block,
+.btn--block {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+.btn--sm {
+  padding: 5px 10px;
+  font-size: 13px;
+}
+.btn--lg {
+  padding: 10px 22px;
+  font-size: 15px;
+}
+/* Purple-ramp hover, used where a secondary button is the focal action. */
+.btn--accent-hover:hover {
+  background: var(--color-accent-100);
+  border-color: var(--color-accent-400);
+  color: var(--color-text);
+}
+
+/* The handoff tints the bar's "Talk to sales" button a flat grey. */
+.btn--tinted {
+  background: #cccccc;
+}
+.btn--tinted:hover {
+  background: color-mix(in srgb, #cccccc 80%, var(--color-text));
+}
+
+/* ---------- Forms ---------- */
+.field > label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 5px;
+  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+  font-weight: 500;
+}
+.input {
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--color-text);
+  caret-color: var(--color-accent);
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: 0;
+}
+.input:hover {
+  border-color: color-mix(in srgb, var(--color-text) 45%, transparent);
+}
+.input:focus-visible {
+  border-color: var(--color-accent);
+  outline-offset: 0;
+}
+textarea.input {
+  min-height: 90px;
+  resize: vertical;
+}
+.seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  border: 1px solid var(--color-divider);
+  border-radius: 0;
+}
+.seg-opt {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.seg-opt input,
+.radio input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.seg-opt + .seg-opt {
+  border-left: 1px solid var(--color-divider);
+}
+.seg-opt:has(input:checked) {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+.seg-opt:not(:has(input:checked)):hover {
+  background: color-mix(in srgb, var(--color-text) 7%, transparent);
+}
+.seg-opt:has(input:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+.radio {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.radio .dot {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-divider);
+}
+.radio:hover .dot {
+  border-color: var(--color-accent);
+}
+.radio input:checked + .dot {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  box-shadow: inset 0 0 0 4px var(--color-bg);
+}
+
+/* ---------- Tags ---------- */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  padding: 3px 10px;
+  border-radius: 0;
+}
+.tag-accent {
+  background: var(--color-accent-100);
+  color: var(--color-accent-800);
+}
+.tag-accent-2 {
+  background: var(--color-accent-2-100);
+  color: var(--color-accent-2-800);
+}
+.tag-neutral {
+  background: var(--color-neutral-100);
+  color: var(--color-neutral-800);
+}
+.tag-outline {
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* =====================================================================
+   Motion, CSS half. These are the always-on decorative loops: they run for
+   as long as the page is open, so the compositor carries them rather than
+   Motion driving them through rAF. Orchestration (entrance, scroll reveal,
+   cycling highlights, the demo form's swap) lives in motion/react.
+   ===================================================================== */
+@keyframes kv-blink {
+  0%,
+  55% {
+    opacity: 1;
+  }
+  60%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes kv-dash {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+@keyframes kv-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+@keyframes kv-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+@keyframes kv-sync {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+@keyframes kv-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  /* Kills the CSS loops. Motion's inline styles are out of reach here and
+     are gated by <MotionConfig reducedMotion="user"> in main.tsx instead. */
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* =====================================================================
+   Layout primitives
+   ===================================================================== */
 .container {
   width: 100%;
   max-width: var(--max);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 var(--gutter);
 }
 .section {
-  padding: 80px 0;
-}
-.section--subtle {
-  background: var(--bg-subtle);
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  padding: 24px 0 72px;
 }
 .section--tight {
-  padding: 48px 0;
+  padding: 24px 0 48px;
 }
+.section--subtle {
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-divider);
+  border-bottom: 1px solid var(--color-divider);
+  padding-top: 56px;
+}
+/* Full-bleed band inside the fixed-width column. */
+.section--bleed {
+  margin-inline: calc(50% - 50vw);
+  border-top: 1px solid var(--color-divider);
+  border-bottom: 1px solid var(--color-divider);
+  overflow: hidden;
+}
+
+/* Numbered section kicker over a hairline: the system's section marker. */
 .eyebrow {
-  display: inline-block;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  display: block;
+  font-size: 13px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--brand-a);
-  margin-bottom: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--color-accent-700);
+  margin-bottom: 12px;
+}
+.rule {
+  height: 1px;
+  width: 100%;
+  border: 0;
+  background: var(--color-divider);
+  margin: 0 0 20px;
+}
+.hr {
+  height: 1px;
+  border: 0;
+  margin: var(--space-4) 0;
+  background: var(--color-divider);
 }
 .lede {
-  font-size: 19px;
-  color: var(--ink-2);
+  font-size: 16px;
+  line-height: 25px;
   max-width: 62ch;
+  color: color-mix(in srgb, var(--color-text) 78%, transparent);
 }
+
+/* Headings on the marketing pages are condensed, uppercase, and tight. */
+.h-display {
+  font-size: clamp(46px, 6.6vw, 88px);
+  line-height: 1.04;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  margin-left: -0.052em;
+}
+.h-section {
+  font-size: clamp(30px, 3.4vw, 44px);
+  line-height: 1.06;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.h-sub {
+  font-size: 21px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
 .grid {
   display: grid;
   gap: 24px;
 }
 .grid--2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
 }
 .grid--3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
 }
 .grid--4 {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
 }
-@media (max-width: 900px) {
-  .grid--3,
-  .grid--4 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: clamp(24px, 4vw, 72px);
+  align-items: start;
 }
-@media (max-width: 640px) {
-  .grid--2,
-  .grid--3,
-  .grid--4 {
-    grid-template-columns: 1fr;
-  }
-  .section {
-    padding: 56px 0;
-  }
-}
-
-.rule {
-  height: 3px;
-  width: 56px;
-  background: var(--brand-gradient);
-  border-radius: 2px;
-  margin: 0 0 24px;
-}
-.gradient-text {
-  background: var(--brand-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* ---------- Buttons ---------- */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 11px 18px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 15px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition:
-    transform 0.08s ease,
-    box-shadow 0.15s ease,
-    background 0.15s ease;
-  white-space: nowrap;
-}
-.btn:active {
-  transform: translateY(1px);
-}
-.btn--primary {
-  color: #fff;
-  background: var(--brand-gradient);
-  box-shadow: 0 4px 14px rgba(83, 38, 113, 0.22);
-}
-.btn--primary:hover {
-  box-shadow: 0 6px 20px rgba(83, 38, 113, 0.3);
-}
-.btn--secondary {
-  background: #fff;
-  border-color: var(--line-strong);
-  color: var(--ink);
-}
-.btn--secondary:hover {
-  border-color: var(--ink);
-}
-.btn--ghost {
-  background: transparent;
-  color: var(--ink);
-}
-.btn--sm {
-  padding: 7px 12px;
-  font-size: 13px;
-}
-
-/* ---------- Header ---------- */
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: var(--brand-a);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-}
-.site-header .brand {
-  color: #fff;
-}
-.site-header__inner {
+.row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 68px;
-  gap: 24px;
-}
-.brand {
-  display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-weight: 700;
-  font-size: 18px;
-  letter-spacing: -0.01em;
 }
-.brand__mark {
-  width: 30px;
-  height: 30px;
-  border-radius: 7px;
+.row--between {
+  justify-content: space-between;
 }
-.nav {
-  display: flex;
-  gap: 4px;
+
+/* Numbered step marker: 54px square, outlined, or solid for the last step. */
+.step-num {
+  display: inline-flex;
   align-items: center;
-}
-.nav a {
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 14.5px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.78);
-}
-.nav a:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-}
-.nav a.active {
-  color: #fff;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  flex: none;
+  border: 1px solid var(--color-accent-500);
+  background: var(--color-bg);
+  font-family: var(--font-heading);
   font-weight: 600;
+  font-size: 20px;
+  color: var(--color-accent-700);
 }
-.header-actions {
+.step-num--solid {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+.step h3 {
+  margin: 18px 0 6px;
+}
+.step p {
+  font-size: 15px;
+  line-height: 23px;
+  color: color-mix(in srgb, var(--color-text) 78%, transparent);
+}
+
+/* Ruled rows: hairline-separated list, optionally numbered or checked. */
+.rows {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+}
+.rows > * {
+  border-top: 1px solid var(--color-divider);
+}
+.rows > *:last-child {
+  border-bottom: 1px solid var(--color-divider);
+}
+.rows--open > *:last-child {
+  border-bottom: 0;
+}
+.row-item {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  padding: 12px 0;
+  font-size: 15px;
+}
+.row-item__num {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--color-accent-700);
+  flex: none;
+}
+.row-item svg {
+  flex: none;
+  align-self: center;
+}
+
+/* Plate: a blueprint box with a title block across the top. */
+.plate__bar {
+  display: flex;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--color-divider);
+}
+.plate__bar > span {
+  padding: 11px 16px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.plate__bar > span:first-child {
+  flex: 1;
+  min-width: 14ch;
+  padding-inline: 18px;
+}
+.plate__bar > span + span {
+  border-left: 1px solid var(--color-divider);
+  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+}
+/* Status strip with a pulsing dot, closing a plate or a mock. */
+.statusbar {
+  display: flex;
   align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-top: 1px solid var(--color-divider);
+  font-size: 12.5px;
+  color: color-mix(in srgb, var(--color-text) 60%, transparent);
 }
-.menu-toggle {
-  display: none;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  background: transparent;
-  color: #fff;
-  border-radius: 6px;
-  padding: 6px 10px;
-}
-
-/* On the purple bar the two button styles invert: outlined white, then solid white. */
-.site-header .btn--secondary {
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.4);
-  color: #fff;
-}
-.site-header .btn--secondary:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: #fff;
-}
-.site-header .btn--primary {
-  background: #fff;
-  color: var(--brand-a);
-  box-shadow: none;
-}
-.site-header .btn--primary:hover {
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
-}
-@media (max-width: 900px) {
-  .nav {
-    display: none;
-  }
-  .nav.open {
-    display: flex;
-    position: absolute;
-    top: 68px;
-    left: 0;
-    right: 0;
-    flex-direction: column;
-    align-items: stretch;
-    background: var(--brand-a);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 12px 16px 16px;
-  }
-  .menu-toggle {
-    display: inline-block;
-  }
-  .header-actions .btn--secondary {
-    display: none;
-  }
-}
-
-/* ---------- Hero ---------- */
-.hero {
-  padding: 96px 0 72px;
-  border-bottom: 1px solid var(--line);
-}
-.hero h1 {
-  font-size: clamp(38px, 5.4vw, 60px);
-  max-width: 18ch;
-  margin-bottom: 22px;
-}
-.hero .lede {
-  margin-bottom: 32px;
-}
-.hero__actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.hero__meta {
-  margin-top: 40px;
-  display: flex;
-  gap: 28px;
-  flex-wrap: wrap;
-  color: var(--muted);
-  font-size: 13.5px;
-}
-.hero__meta span::before {
-  content: "";
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--brand-gradient);
-  margin-right: 8px;
-  vertical-align: middle;
+.dot-live {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  background: var(--color-accent);
+  animation: kv-sync 1.8s ease-in-out infinite;
 }
 
 /* ---------- Cards ---------- */
 .card {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 26px;
+  background: transparent;
+  border: 1px solid var(--color-divider);
+  border-radius: 0;
+  padding: 20px;
 }
 .card h3 {
-  font-size: 17px;
-  margin-bottom: 8px;
+  font-size: 19px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 0;
 }
 .card p {
-  color: var(--ink-2);
-  font-size: 15px;
-}
-.card--brand {
-  background: var(--brand-gradient);
-  border-color: transparent;
-}
-.card--brand h3 {
-  color: #fff;
-}
-.card--brand p {
-  color: rgba(255, 255, 255, 0.82);
+  font-size: 14.5px;
+  line-height: 22px;
+  margin: 10px 0 0;
+  color: color-mix(in srgb, var(--color-text) 78%, transparent);
 }
 .card__icon {
   width: 36px;
   height: 36px;
-  border-radius: 8px;
-  background: var(--accent-soft);
+  border: 1px solid var(--color-divider);
+  background: var(--color-accent-100);
   display: grid;
   place-items: center;
-  margin-bottom: 16px;
-  color: var(--brand-a);
+  margin-bottom: 14px;
+  color: var(--color-accent-800);
   font-weight: 700;
   font-size: 14px;
 }
+
 .feature-list {
   display: grid;
   gap: 14px;
@@ -403,248 +772,845 @@ code {
 .feature-list li {
   display: flex;
   gap: 12px;
-  font-size: 15.5px;
-  color: var(--ink-2);
+  font-size: 15px;
+  line-height: 23px;
+  color: color-mix(in srgb, var(--color-text) 78%, transparent);
 }
 .feature-list li::before {
   /* Drawn as a rule, not an em dash character: this repo has no em dashes. */
   content: "";
   width: 14px;
-  height: 2px;
-  border-radius: 1px;
-  margin-top: 11px;
-  background: var(--brand-a);
+  height: 1px;
+  margin-top: 12px;
+  background: var(--color-accent);
   flex: none;
 }
 
-.split {
-  display: grid;
-  grid-template-columns: 1.05fr 1fr;
-  gap: 56px;
+/* =====================================================================
+   Site chrome
+   ===================================================================== */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: color-mix(in srgb, var(--color-bg) 90%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--color-divider);
+}
+.site-header__inner {
+  display: flex;
   align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: var(--space-3) var(--gutter);
 }
-@media (max-width: 900px) {
-  .split {
-    grid-template-columns: 1fr;
-    gap: 32px;
-  }
+.brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  flex: none;
 }
-.split h2 {
-  font-size: 32px;
-  margin-bottom: 16px;
+/* Stripped-down bar for the conversion pages, which drop the full nav. */
+.slim-header {
+  border-bottom: 1px solid var(--color-divider);
 }
-.split p {
-  color: var(--ink-2);
-  margin-bottom: 20px;
+.slim-header__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: var(--space-3) var(--gutter);
+}
+.brand img {
+  height: 22px;
+  width: auto;
+}
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.site-nav a {
+  font-size: 14px;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+.site-nav a:hover,
+.site-nav a.active {
+  color: var(--color-accent);
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+.menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 32px;
+  margin-left: auto;
+  border: 1px solid var(--color-divider);
+  background: transparent;
+  cursor: pointer;
+}
+.menu-toggle span {
+  display: block;
+  width: 16px;
+  height: 1px;
+  background: var(--color-text);
+  box-shadow:
+    0 -5px 0 var(--color-text),
+    0 5px 0 var(--color-text);
 }
 
-/* ---------- Stats, quotes, CTA ---------- */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 24px;
+/* The drop panel. A separate element from the desktop row rather than a state
+   of it, so AnimatePresence can mount and unmount it: `height: auto` needs a
+   box that starts at zero, which is why the padding sits on the inner div. */
+.site-nav-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-divider);
 }
-@media (max-width: 700px) {
-  .stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.site-nav-panel > div {
+  display: flex;
+  flex-direction: column;
+  padding: 4px var(--gutter) 16px;
+}
+.site-nav-panel a {
+  padding: 11px 0;
+  border-top: 1px solid var(--color-divider);
+  font-size: 16px;
+  color: var(--color-text);
+}
+.site-nav-panel a:hover,
+.site-nav-panel a.active {
+  color: var(--color-accent);
+}
+
+/* The reference bar is a single row of seven links and three buttons, which
+   overflows long before 360px. Below 1080px it collapses into the panel. */
+@media (min-width: 1081px) {
+  .site-nav-panel {
+    display: none;
   }
 }
-.stat {
-  border-left: 3px solid;
-  border-image: var(--brand-gradient) 1;
-  padding-left: 16px;
+@media (max-width: 1080px) {
+  .site-nav {
+    display: none;
+  }
+  .menu-toggle {
+    display: inline-flex;
+    order: 3;
+  }
+  .header-actions {
+    order: 2;
+    margin-left: auto;
+  }
+  .header-actions .btn--hide-sm {
+    display: none;
+  }
 }
-.stat strong {
-  display: block;
-  font-size: 30px;
-  letter-spacing: -0.02em;
+@media (max-width: 640px) {
+  .header-actions .btn--hide-xs {
+    display: none;
+  }
 }
-.stat span {
-  color: var(--muted);
+
+.site-footer {
+  border-top: 1px solid var(--color-divider);
+  margin-top: 24px;
+  font-size: 13px;
+  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+}
+.site-footer__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap: 32px;
+  padding: 44px 0 36px;
+}
+.site-footer h4 {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  margin-bottom: 12px;
+}
+.site-footer li {
+  margin-bottom: 8px;
+}
+.site-footer a {
+  color: inherit;
+}
+.site-footer a:hover {
+  color: var(--color-accent);
+}
+.site-footer__bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--color-divider);
+  padding: 24px 0 44px;
+}
+.site-footer__bar img {
+  height: 15px;
+  width: auto;
+  opacity: 0.8;
+}
+.site-footer__bar .end {
+  margin-left: auto;
+}
+
+/* ---------- Hero and page headers ---------- */
+.hero {
+  position: relative;
+  padding: 96px 0 60px;
+}
+.hero__backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.hero__content {
+  position: relative;
+}
+.hero .lede {
+  font-size: 17px;
+  line-height: 26px;
+  max-width: 58ch;
+  margin: 28px 0 0;
+  color: var(--color-text);
+}
+.hero__actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+.page-header {
+  padding: 72px 0 40px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.page-header h1 {
+  font-size: clamp(36px, 4.6vw, 64px);
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  margin: 0 0 0 -0.052em;
+  max-width: 22ch;
+}
+.page-header .lede {
+  margin-top: 20px;
+}
+
+/* =====================================================================
+   Landing page objects
+   ===================================================================== */
+
+/* Product mock: the fake app under the hero. */
+.mock {
+  background: var(--color-bg);
+  box-shadow: var(--shadow-lg);
+}
+.mock__bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--color-divider);
+  flex-wrap: wrap;
+}
+.mock__body {
+  display: grid;
+  grid-template-columns: minmax(150px, 190px) minmax(0, 1fr) minmax(220px, 270px);
+}
+.mock__rail {
+  border-right: 1px solid var(--color-divider);
+  padding: 14px 0;
+}
+.mock__pane {
+  padding: 18px 22px;
+  min-width: 0;
+}
+.mock__aside {
+  border-left: 1px solid var(--color-divider);
+  padding: 14px 0;
+}
+.mock__label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+  padding: 0 16px 8px;
+}
+.mock__rail-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 16px;
   font-size: 14px;
+  color: color-mix(in srgb, var(--color-text) 78%, transparent);
 }
+.mock__rail-item span {
+  font-size: 12px;
+  color: color-mix(in srgb, var(--color-text) 50%, transparent);
+}
+.mock__rail-item.is-active {
+  background: var(--color-accent-100);
+  color: var(--color-accent-800);
+  border-right: 2px solid var(--color-accent);
+  font-weight: 500;
+}
+.mock__rail-item.is-active span {
+  color: inherit;
+}
+.mock__avatar {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--color-divider);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+}
+.mock__avatar--tinted {
+  background: var(--color-accent-100);
+  color: var(--color-accent-800);
+}
+.mock__skeleton {
+  height: 9px;
+  background: var(--color-neutral-300);
+}
+.mock__live {
+  border: 1px solid var(--color-accent-300);
+  background: var(--color-accent-100);
+  padding: 10px 12px;
+}
+.mock__caret {
+  display: inline-block;
+  width: 8px;
+  height: 14px;
+  background: var(--color-accent);
+  vertical-align: -2px;
+  margin-left: 2px;
+  animation: kv-blink 1.1s steps(1) infinite;
+}
+.mock__composer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--color-divider);
+  padding: 9px 12px;
+  margin-top: 16px;
+}
+.mock__timeline-item {
+  padding: 8px;
+  border-left: 2px solid var(--color-divider);
+}
+/* The chip floats over the mock's top-right corner. Motion fades the outer
+   element in; the bob stays on the inner one so the two never fight over
+   the same transform. */
+.mock__chip {
+  position: absolute;
+  top: -4px;
+  right: 36px;
+  z-index: 5;
+}
+.mock__chip-float {
+  animation: kv-float 5s ease-in-out infinite;
+}
+.mock__chip .blueprint {
+  background: var(--color-bg);
+  padding: 9px 14px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  box-shadow: var(--shadow-md);
+}
+@media (max-width: 860px) {
+  .mock__body {
+    grid-template-columns: 1fr;
+  }
+  .mock__rail {
+    border-right: 0;
+    border-bottom: 1px solid var(--color-divider);
+  }
+  .mock__aside {
+    border-left: 0;
+    border-top: 1px solid var(--color-divider);
+  }
+  .mock__chip {
+    display: none;
+  }
+}
+
+/* ---------- Built with and backed by ----------
+   A fixed label beside a ticker. The band's rules span the content column,
+   matching the design reference; `background` is the page ground, so only the
+   hairlines read as an edge. */
+.backers-band {
+  padding: 8px 0 48px;
+}
+.backers {
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 3vw, 48px);
+  padding: 26px 0;
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-divider);
+  border-bottom: 1px solid var(--color-divider);
+}
+.backers__label {
+  flex: none;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: color-mix(in srgb, #0a1b4d 55%, transparent);
+  white-space: nowrap;
+}
+.backers__viewport {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+.backers__track {
+  display: flex;
+  width: max-content;
+  animation: kv-marquee 28s linear infinite;
+}
+.backers__viewport:hover .backers__track {
+  animation-play-state: paused;
+}
+.backers__set {
+  display: flex;
+}
+.backer {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  white-space: nowrap;
+  /* The gap rides on each mark rather than on the track: see backers.tsx. */
+  margin-right: clamp(48px, 6vw, 96px);
+}
+.backer__aws {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+.backer__aws > span {
+  font-size: 20px;
+  font-weight: 700;
+  color: #232f3e;
+  letter-spacing: 0.01em;
+}
+.backer__aws svg {
+  margin-top: 1px;
+}
+
+/* The label keeps its own line rather than squeezing the ticker to nothing. */
+@media (max-width: 640px) {
+  .backers {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .backers__label {
+    white-space: normal;
+  }
+}
+
+/* No ticker: one static centred row that wraps. */
+@media (prefers-reduced-motion: reduce) {
+  .backers__viewport {
+    overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .backers__track {
+    width: auto;
+  }
+  .backers__set {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: clamp(28px, 5vw, 64px);
+    width: 100%;
+  }
+  .backers__set--dupe {
+    display: none;
+  }
+  .backer {
+    margin-right: 0;
+  }
+}
+
+/* Context event cards under How it works. */
+.event-card {
+  border: 1px solid var(--color-divider);
+  padding: 14px 16px;
+}
+.event-card__head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--color-accent-700);
+}
+.event-card__head span {
+  color: color-mix(in srgb, var(--color-text) 50%, transparent);
+}
+.event-card__title {
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 6px;
+}
+.event-card__note {
+  font-size: 12.5px;
+  color: color-mix(in srgb, var(--color-text) 60%, transparent);
+  margin-top: 2px;
+}
+
+/* Dashed connector behind the numbered steps. */
+.connector {
+  position: absolute;
+  top: 27px;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  pointer-events: none;
+}
+
+/* The "Watch it work" row, centred under the four steps. */
+.watch-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 40px;
+}
+.watch-row__note {
+  font-size: 13px;
+  color: color-mix(in srgb, #0a1b4d 60%, transparent);
+}
+
+/* ---------- Video modal ----------
+   Portalled to <body>; see video-modal.tsx for why. */
+.video-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 4vw, 56px);
+  background: color-mix(in srgb, var(--color-accent-2-900) 72%, transparent);
+  backdrop-filter: blur(6px);
+}
+.video-modal__panel {
+  position: relative;
+  width: min(1080px, 100%);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-lg);
+}
+.video-modal__bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-divider);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.video-modal__bar .btn {
+  margin-left: auto;
+}
+.video-modal__ref {
+  color: color-mix(in srgb, var(--color-text) 60%, transparent);
+}
+.video-modal video {
+  display: block;
+  width: 100%;
+  max-height: min(72vh, 640px);
+  background: var(--color-accent-2-900);
+}
+.video-modal__missing {
+  margin: 0;
+  padding: 48px 24px;
+  text-align: center;
+  font-size: 14.5px;
+  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+}
+.video-modal__missing code {
+  color: var(--color-accent-700);
+}
+
+/* Integrations: centre tile, then an infinite marquee of tool tiles. */
+.tile-mark {
+  position: relative;
+  width: 118px;
+  height: 118px;
+  margin: 0 auto;
+  border: 1px solid var(--color-divider);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.tile-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.tile-mark svg {
+  position: absolute;
+}
+.stem {
+  width: 1px;
+  margin: 0 auto;
+  background: var(--color-divider);
+}
+.marquee {
+  display: flex;
+  width: max-content;
+  padding: 0 0 64px;
+  animation: kv-marquee 36s linear infinite;
+}
+.marquee__set {
+  display: flex;
+}
+/* The gap rides on each tile, not on the track. With `gap` on the track and
+   the sets, a -50% shift lands half a gap short of one set width and the
+   ticker jumps 9px every cycle. Same rule as `.backer`. */
+.tool-tile {
+  width: 108px;
+  flex: none;
+  margin-left: 18px;
+  border: 1px solid var(--color-divider);
+  padding: 20px 0 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.tool-tile img,
+.tool-tile svg {
+  width: 30px;
+  height: 30px;
+}
+.tool-tile span {
+  font-size: 12px;
+  color: color-mix(in srgb, var(--color-text) 60%, transparent);
+}
+
+/* FAQ */
+.disclosure {
+  border-bottom: 1px solid var(--color-divider);
+}
+.disclosure__summary {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  padding: 18px 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.disclosure__summary i {
+  color: var(--color-accent-700);
+  width: 18px;
+  flex: none;
+  font-style: normal;
+}
+.faq p {
+  font-size: 15px;
+  line-height: 24px;
+  max-width: 68ch;
+  margin: 0 0 20px 34px;
+  color: color-mix(in srgb, var(--color-text) 78%, transparent);
+}
+
+/* =====================================================================
+   Shared page objects carried across from the previous design
+   ===================================================================== */
 .cta {
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  padding: 48px;
+  border: 1px solid var(--color-divider);
+  padding: 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 32px;
-  background: var(--bg-subtle);
+  background: var(--color-bg);
 }
 .cta h2 {
-  font-size: 28px;
-  margin-bottom: 8px;
+  font-size: clamp(26px, 3vw, 36px);
+  line-height: 1.06;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
 }
 .cta p {
-  color: var(--ink-2);
+  font-size: 15px;
+  line-height: 24px;
+  color: color-mix(in srgb, var(--color-text) 78%, transparent);
 }
 @media (max-width: 800px) {
   .cta {
     flex-direction: column;
     align-items: flex-start;
-    padding: 32px;
+    padding: 28px;
   }
 }
 
-/* ---------- Page header ---------- */
-.page-header {
-  padding: 72px 0 48px;
-  border-bottom: 1px solid var(--line);
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap: 24px;
 }
-.page-header h1 {
-  font-size: clamp(32px, 4.2vw, 48px);
-  margin-bottom: 16px;
-  max-width: 22ch;
+.stat {
+  border-left: 2px solid var(--color-accent);
+  padding-left: 16px;
+}
+.stat strong {
+  display: block;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 32px;
+  letter-spacing: 0.01em;
+}
+.stat span {
+  font-size: 14px;
+  color: color-mix(in srgb, var(--color-text) 60%, transparent);
 }
 
-/* ---------- Pricing ---------- */
 .plan {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 .plan--featured {
-  border-color: var(--brand-a);
-  box-shadow: var(--shadow);
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-md);
 }
 .plan__price {
-  font-size: 34px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 36px;
+  letter-spacing: 0.01em;
 }
 .plan__price small {
+  font-family: var(--font-body);
   font-size: 14px;
-  color: var(--muted);
-  font-weight: 500;
+  font-weight: 400;
+  color: color-mix(in srgb, var(--color-text) 60%, transparent);
 }
 .plan .feature-list {
   flex: 1;
 }
+
+.table-wrap {
+  overflow-x: auto;
+}
 table.compare {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14.5px;
+  font-size: 14px;
 }
 table.compare th,
 table.compare td {
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--line);
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--color-divider);
   text-align: left;
   vertical-align: top;
 }
 table.compare th {
+  font-size: 11px;
   font-weight: 600;
-  color: var(--muted);
-  font-size: 12.5px;
-  text-transform: uppercase;
   letter-spacing: 0.08em;
-}
-.table-wrap {
-  overflow-x: auto;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-text) 60%, transparent);
 }
 
-/* ---------- Forms ---------- */
 .form {
   display: grid;
-  gap: 14px;
+  gap: 18px;
 }
 .form label {
   display: grid;
-  gap: 6px;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--ink-2);
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--color-text) 70%, transparent);
 }
 .form input,
 .form textarea,
 .form select {
-  padding: 10px 12px;
-  border: 1px solid var(--line-strong);
-  border-radius: 8px;
-  background: #fff;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 10px;
+  font-size: 14px;
   font-weight: 400;
+  color: var(--color-text);
+  caret-color: var(--color-accent);
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: 0;
 }
-.form input:focus,
-.form textarea:focus,
-.form select:focus {
-  outline: 2px solid rgba(83, 38, 113, 0.25);
-  border-color: var(--brand-a);
+.form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+.form input:hover,
+.form textarea:hover,
+.form select:hover {
+  border-color: color-mix(in srgb, var(--color-text) 45%, transparent);
+}
+.form input:focus-visible,
+.form textarea:focus-visible,
+.form select:focus-visible {
+  border-color: var(--color-accent);
+  outline-offset: 0;
 }
 .notice {
   padding: 14px 16px;
-  border-radius: 8px;
-  background: var(--ok-soft);
-  color: var(--ok);
+  border: 1px solid var(--color-accent-300);
+  background: var(--color-accent-100);
+  color: var(--color-accent-800);
   font-size: 14.5px;
 }
 
-/* ---------- Footer ---------- */
-.site-footer {
-  border-top: 1px solid var(--line);
-  padding: 56px 0 32px;
-  color: var(--muted);
-  font-size: 14px;
-}
-.site-footer__grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 32px;
-  margin-bottom: 40px;
-}
-@media (max-width: 800px) {
-  .site-footer__grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-.site-footer h4 {
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ink);
-  margin-bottom: 12px;
-}
-.site-footer li {
-  margin-bottom: 8px;
-}
-.site-footer a:hover {
-  color: var(--ink);
-}
-.site-footer__bar {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  border-top: 1px solid var(--line);
-  padding-top: 20px;
-}
-
-/* ---------- Product preview frame (used on home) ---------- */
-.frame {
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-  background: #fff;
-}
-.frame__bar {
-  display: flex;
-  gap: 6px;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--line);
-  background: var(--bg-subtle);
-}
-.frame__bar i {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--line-strong);
-}
-
 /* =====================================================================
-   Simulation (/demo): a dense, light workspace shell: topbar over
-   [rail | main | inspector]. Mirrors the product's enterprise theme.
+   Parked simulation (src/demo/, not routed). Left on its own local tokens
+   so it keeps rendering if /demo-style previews are restored.
    ===================================================================== */
 .sim {
   --sim-ink: #17241f;
@@ -784,14 +1750,6 @@ table.compare th {
 .tier--privileged {
   background: var(--danger-soft);
   color: var(--danger);
-}
-.row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.row--between {
-  justify-content: space-between;
 }
 .list-row {
   display: grid;
