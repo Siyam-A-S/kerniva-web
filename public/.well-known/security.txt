@@ -1,0 +1,4 @@
+Contact: mailto:security@kerniva.app
+Expires: 2027-08-31T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://kerniva.app/.well-known/security.txt
