@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Corners } from "./blueprint";
 import { XIcon } from "./icons";
 import { EASE } from "./transitions";
+import { VIDEO_MODAL } from "../content";
 
 /**
  * Paths to the launch film and its poster frame. The design handoff shipped
@@ -96,8 +97,8 @@ function Panel({ onClose }: { onClose: () => void }) {
       >
         <Corners />
         <div className="video-modal__bar">
-          <span id="video-modal-title">Kerniva launch film</span>
-          <span className="video-modal__ref">KV-F1</span>
+          <span id="video-modal-title">{VIDEO_MODAL.title}</span>
+          <span className="video-modal__ref">{VIDEO_MODAL.ref}</span>
           <button
             ref={closeRef}
             type="button"
@@ -105,13 +106,13 @@ function Panel({ onClose }: { onClose: () => void }) {
             onClick={close}
             aria-label="Close"
           >
-            Close
+            {VIDEO_MODAL.close}
             <XIcon size={14} />
           </button>
         </div>
         {missing ? (
           <p className="video-modal__missing">
-            The launch film is not in this build yet. Add it at <code>public{LAUNCH_FILM}</code>.
+            {VIDEO_MODAL.missingBefore} <code>public{LAUNCH_FILM}</code>.
           </p>
         ) : (
           <video

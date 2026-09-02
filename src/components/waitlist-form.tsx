@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { EASE } from "./transitions";
+import { BTN_JOIN_WAITLIST, WAITLIST_FORM, WAITLIST_WORK_KINDS } from "../content";
 
 /**
  * The waitlist form shown everywhere the live simulation used to be offered.
@@ -30,39 +31,36 @@ export function WaitlistForm({ compact = false }: { compact?: boolean }) {
       <AnimatePresence mode="wait" initial={false}>
         {sent ? (
           <motion.div key="sent" {...swap}>
-            <div className="notice">
-              You are on the list. We will write to you when the simulation opens.
-            </div>
+            <div className="notice">{WAITLIST_FORM.sent}</div>
           </motion.div>
         ) : (
           <motion.div key="fields" className="form" {...swap}>
             <label>
-              Name
+              {WAITLIST_FORM.name}
               <input name="name" required autoComplete="name" />
             </label>
             <label>
-              Work email
+              {WAITLIST_FORM.email}
               <input name="email" type="email" required autoComplete="email" />
             </label>
             <label>
-              Organization
+              {WAITLIST_FORM.org}
               <input name="org" autoComplete="organization" />
             </label>
             <label>
-              What kind of work does your team do?
+              {WAITLIST_FORM.work}
               <select name="work" defaultValue="consulting">
-                <option value="consulting">Consulting and advisory</option>
-                <option value="research">Research</option>
-                <option value="product">Product and project work</option>
-                <option value="other">Other</option>
+                {WAITLIST_WORK_KINDS.map((kind) => (
+                  <option value={kind.value} key={kind.value}>
+                    {kind.label}
+                  </option>
+                ))}
               </select>
             </label>
             <button className="btn btn--primary" type="submit">
-              Join the waitlist
+              {BTN_JOIN_WAITLIST}
             </button>
-            <small style={{ color: "var(--muted)" }}>
-              One email when access opens. No newsletter, no sharing.
-            </small>
+            <small style={{ color: "var(--muted)" }}>{WAITLIST_FORM.note}</small>
           </motion.div>
         )}
       </AnimatePresence>

@@ -7,20 +7,44 @@ import { Blueprint, Corners } from "../components/blueprint";
 import { Disclosure } from "../components/disclosure";
 import { SectionLink } from "../components/section-link";
 import { VideoModal } from "../components/video-modal";
-import {
-  ArrowRightIcon,
-  PlayIcon,
-  AuditIcon,
-  BotIcon,
-  CheckIcon,
-  CodeIcon,
-  GlobeIcon,
-  IdentityIcon,
-  LockIcon,
-  ShieldIcon,
-  TiersIcon,
-} from "../components/icons";
+import { ArrowRightIcon, CheckIcon, PlayIcon } from "../components/icons";
 import { useAutoCycle, useTypewriter } from "../components/anim";
+import {
+  ARTIFACTS,
+  BTN_BOOK_DEMO,
+  BTN_JOIN_WAITLIST,
+  COMPANY_HIRING,
+  COMPANY_LEDE,
+  COMPANY_WHERE,
+  EMAIL_HELLO,
+  EMAIL_SECURITY,
+  FAQ,
+  HOME_COMPANY,
+  HOME_EVENTS as EVENTS,
+  HOME_FAQ_EYEBROW,
+  HOME_HERO,
+  HOME_HOW,
+  HOME_INTEGRATIONS,
+  HOME_MOCK,
+  HOME_NEXT_STEP,
+  HOME_RAIL as RAIL,
+  HOME_RESEARCH,
+  HOME_SECURITY,
+  HOME_SECURITY_CARDS as SECURITY,
+  HOME_STEPS as STEPS,
+  HOME_TIMELINE as TIMELINE,
+  HOME_TYPE_PHRASES as TYPE_PHRASES,
+  INTEGRITY,
+  PRINCIPLES,
+  RESEARCH_ARTIFACTS_TITLE,
+  RESEARCH_INTEGRITY_LEDE,
+  RESEARCH_LEDE,
+  RESEARCH_STEPS,
+  SECURITY_COMPLIANCE_BODY,
+  SECURITY_LEDE,
+  TITLE_HOME,
+  TOOLS,
+} from "../content";
 import {
   CYCLE_ACTIVE_BG,
   CYCLE_ACTIVE_BORDER,
@@ -123,7 +147,7 @@ function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={riseIn(0.15, 0.85)}
             >
-              The AI workspace for teams
+              {HOME_HERO.line1}
             </motion.span>
             <motion.span
               style={{ display: "block", color: "var(--color-accent-700)" }}
@@ -131,7 +155,7 @@ function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={riseIn(0.29, 0.85)}
             >
-              with no time to lose
+              {HOME_HERO.line2}
             </motion.span>
           </h1>
           <motion.p
@@ -140,8 +164,7 @@ function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={riseIn(0.5)}
           >
-            Kerniva connects your team’s research, files, AI sessions, and project decisions in real
-            time, so the next collaborator can continue without reconstructing context.
+            {HOME_HERO.lede}
           </motion.p>
           <motion.div
             className="hero__actions"
@@ -151,12 +174,12 @@ function Hero() {
           >
             <Link to="/demo" className="btn btn--primary btn--lg blueprint">
               <Corners />
-              Join the design-partner program
+              {HOME_HERO.primary}
             </Link>
             {/* A real anchor, so the smooth scroll comes from `scroll-behavior`
                 in styles.css, which the reduced-motion block already turns off. */}
             <SectionLink hash="how" className="btn btn--secondary btn--lg">
-              See how it works
+              {HOME_HERO.secondary}
               <ArrowRightIcon size={14} />
             </SectionLink>
           </motion.div>
@@ -167,28 +190,6 @@ function Hero() {
 }
 
 /* -------------------------------------------------------- product mock --- */
-
-const TYPE_PHRASES = [
-  "Summarizing yesterday’s session for handoff…",
-  "Linking pricing_v3.fig to Decision #12…",
-  "Drafting a starting point for Maya…",
-  "Connecting competitor scan to the open question…",
-] as const;
-
-const TIMELINE = [
-  { title: "Decision logged · ship variant B", meta: "Maya · 2m ago" },
-  { title: "File linked · pricing_v3.fig", meta: "Jon · 14m ago" },
-  { title: "Research added · competitor scan", meta: "Kerniva · 1h ago" },
-  { title: "Session summarized for handoff", meta: "Kerniva · 2h ago" },
-] as const;
-
-const RAIL = [
-  { label: "Overview", count: "" },
-  { label: "Research", count: "12" },
-  { label: "Files", count: "34" },
-  { label: "AI sessions", count: "8", active: true },
-  { label: "Decisions", count: "5" },
-] as const;
 
 function ProductMock() {
   const typed = useTypewriter(TYPE_PHRASES);
@@ -218,9 +219,9 @@ function ProductMock() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Handoff ready
+                  {HOME_MOCK.chipTitle}
                 </span>
-                <span style={{ fontSize: 12, color: muted(60) }}>nothing to reconstruct</span>
+                <span style={{ fontSize: 12, color: muted(60) }}>{HOME_MOCK.chipNote}</span>
               </Blueprint>
             </div>
           </motion.div>
@@ -243,19 +244,19 @@ function ProductMock() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Project · Atlas launch
+                  {HOME_MOCK.project}
                 </span>
-                <span className="tag tag-accent">Live</span>
+                <span className="tag tag-accent">{HOME_MOCK.liveTag}</span>
                 <div style={{ marginLeft: "auto", display: "flex", gap: 6, alignItems: "center" }}>
-                  <span className="mock__avatar mock__avatar--tinted">MK</span>
-                  <span className="mock__avatar mock__avatar--tinted">JT</span>
-                  <span className="mock__avatar">+3</span>
+                  <span className="mock__avatar mock__avatar--tinted">{HOME_MOCK.avatars[0]}</span>
+                  <span className="mock__avatar mock__avatar--tinted">{HOME_MOCK.avatars[1]}</span>
+                  <span className="mock__avatar">{HOME_MOCK.avatars[2]}</span>
                 </div>
               </div>
 
               <div className="mock__body">
                 <div className="mock__rail">
-                  <div className="mock__label">Workspace</div>
+                  <div className="mock__label">{HOME_MOCK.railLabel}</div>
                   {RAIL.map((item) => (
                     <span
                       key={item.label}
@@ -286,9 +287,9 @@ function ProductMock() {
                         textTransform: "uppercase",
                       }}
                     >
-                      AI session · Pricing-page rewrite
+                      {HOME_MOCK.sessionTitle}
                     </span>
-                    <span className="tag tag-outline">shared with team</span>
+                    <span className="tag tag-outline">{HOME_MOCK.sharedTag}</span>
                   </div>
 
                   <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
@@ -306,7 +307,7 @@ function ProductMock() {
                           color: "var(--color-accent-700)",
                         }}
                       >
-                        Kerniva · live
+                        {HOME_MOCK.liveLabel}
                       </span>
                       <div
                         style={{ fontSize: 14, lineHeight: "21px", marginTop: 4, minHeight: 21 }}
@@ -327,7 +328,7 @@ function ProductMock() {
                         color: muted(45),
                       }}
                     >
-                      Continue this session…
+                      {HOME_MOCK.composer}
                     </span>
                     <span
                       style={{
@@ -339,13 +340,13 @@ function ProductMock() {
                         color: "var(--color-accent-700)",
                       }}
                     >
-                      ↵ send
+                      {HOME_MOCK.send}
                     </span>
                   </div>
                 </div>
 
                 <div className="mock__aside">
-                  <div className="mock__label">Context timeline</div>
+                  <div className="mock__label">{HOME_MOCK.timelineLabel}</div>
                   <div
                     style={{ display: "flex", flexDirection: "column", gap: 2, padding: "0 10px" }}
                   >
@@ -369,10 +370,8 @@ function ProductMock() {
 
               <div className="statusbar">
                 <span className="dot-live" />
-                Context: 27 sources connected · synced 4s ago
-                <span style={{ marginLeft: "auto" }}>
-                  Everything above stays attached to the project
-                </span>
+                {HOME_MOCK.status}
+                <span style={{ marginLeft: "auto" }}>{HOME_MOCK.statusEnd}</span>
               </div>
             </Blueprint>
           </motion.div>
@@ -384,59 +383,16 @@ function ProductMock() {
 
 /* ------------------------------------------------------- how it works --- */
 
-const STEPS = [
-  {
-    n: "01",
-    title: "The team works",
-    body: "Research, files, AI sessions, and decisions happen where they always do: inside the project.",
-  },
-  {
-    n: "02",
-    title: "Kerniva connects it",
-    body: "Every artifact is linked to the project in real time: who made it, why, and what it changed.",
-  },
-  {
-    n: "03",
-    title: "A teammate opens it",
-    body: "The next collaborator sees the full state of the project: not a folder, a trail.",
-  },
-  {
-    n: "04",
-    title: "Work continues",
-    body: "No reconstructing context, no re-asking, no starting over. They pick up mid-thought.",
-    solid: true,
-  },
-] as const;
-
-const EVENTS = [
-  {
-    at: "now",
-    title: "AI session linked to Atlas launch",
-    note: "visible to the whole team instantly",
-  },
-  {
-    at: "2m",
-    title: "Decision recorded with its evidence",
-    note: "the “why” travels with the “what”",
-  },
-  {
-    at: "9m",
-    title: "Research attached to the open question",
-    note: "no more “where did we see that?”",
-  },
-  { at: "14m", title: "Handoff summary drafted for Maya", note: "she starts where Jon stopped" },
-] as const;
-
 function HowItWorks({ onWatch }: { onWatch: () => void }) {
   const active = useAutoCycle(EVENTS.length);
 
   return (
     <motion.section id="how" className="section" style={{ paddingTop: 36 }} {...reveal}>
       <div className="container">
-        <span className="eyebrow">02 · How it works</span>
+        <span className="eyebrow">{HOME_HOW.eyebrow}</span>
         <hr className="rule" />
         <h2 className="h-section" style={{ maxWidth: "22ch", marginBottom: 40 }}>
-          Work once. Hand it off in minutes, not meetings.
+          {HOME_HOW.title}
         </h2>
 
         <div style={{ position: "relative" }}>
@@ -487,9 +443,9 @@ function HowItWorks({ onWatch }: { onWatch: () => void }) {
             onClick={onWatch}
           >
             <PlayIcon size={16} />
-            Watch it work
+            {HOME_HOW.watch}
           </button>
-          <span className="watch-row__note">See a handoff happen end to end · 45 sec</span>
+          <span className="watch-row__note">{HOME_HOW.watchNote}</span>
         </div>
 
         <div
@@ -511,7 +467,7 @@ function HowItWorks({ onWatch }: { onWatch: () => void }) {
               transition={cycleTransition}
             >
               <div className="event-card__head">
-                Context event <span>{event.at}</span>
+                {HOME_HOW.eventLabel} <span>{event.at}</span>
               </div>
               <div className="event-card__title">{event.title}</div>
               <div className="event-card__note">{event.note}</div>
@@ -547,19 +503,6 @@ function SlackMark() {
     </svg>
   );
 }
-
-const TOOLS = [
-  { name: "Slack" },
-  { name: "GitHub", src: "/logos/github.svg" },
-  { name: "Notion", src: "/logos/notion.svg" },
-  { name: "Linear", src: "/logos/linear.svg" },
-  { name: "Google Drive", src: "/logos/googledrive.svg" },
-  { name: "Figma", src: "/logos/figma.svg" },
-  { name: "Jira", src: "/logos/jira.svg" },
-  { name: "Gmail", src: "/logos/gmail.svg" },
-  { name: "Dropbox", src: "/logos/dropbox.svg" },
-  { name: "Claude", src: "/logos/claude.svg" },
-] as const;
 
 function ToolSet({ hidden = false }: { hidden?: boolean }) {
   return (
@@ -600,7 +543,7 @@ function Integrations() {
     >
       <div className="container" style={{ textAlign: "center" }}>
         <span className="eyebrow" style={{ marginBottom: 16 }}>
-          03 · Integrations
+          {HOME_INTEGRATIONS.eyebrow}
         </span>
         <h2
           className="h-section"
@@ -611,11 +554,10 @@ function Integrations() {
             color: "#5b0077",
           }}
         >
-          Kerniva connects to the tools your team already uses
+          {HOME_INTEGRATIONS.title}
         </h2>
         <p className="lede" style={{ maxWidth: "52ch", margin: "18px auto 0" }}>
-          Context moves into your existing workflow: research, files, sessions, and decisions arrive
-          with the evidence your team needs to act.
+          {HOME_INTEGRATIONS.lede}
         </p>
         <div className="stem" style={{ height: 56, margin: "28px auto 0" }} />
         <div className="tile-mark">
@@ -637,53 +579,17 @@ function Integrations() {
 
 /* ---------------------------------------------------------- research --- */
 
-const RESEARCH_STEPS = [
-  {
-    n: "01",
-    title: "Build the library",
-    body: "Drop in papers, datasets, notes, and prior drafts. Each source is extracted, embedded, and graphed so relationships between concepts, authors, and claims become navigable.",
-  },
-  {
-    n: "02",
-    title: "Work the thesis",
-    body: "Run literature reviews, gap analyses, and argument maps in a Relay session with your supervisor. Every claim in a draft links back to the passage it came from.",
-  },
-  {
-    n: "03",
-    title: "Generate and defend",
-    body: "Produce chapters, abstracts, slide decks, and reviewer responses as governed artifacts. Supervisors approve; the record shows what was AI-assisted and what was not.",
-    solid: true,
-  },
-] as const;
-
-const INTEGRITY = [
-  "Citation-preserving drafts with inline provenance",
-  "Graphify-powered concept graph across the whole library",
-  "Supervisor and committee roles with approval rights",
-  "Exportable audit trail for ethics and integrity offices",
-] as const;
-
-const ARTIFACTS = [
-  "Structured literature review with coverage matrix",
-  "Research proposal and methodology section",
-  "Chapter drafts with tracked claims",
-  "Conference deck and poster outline",
-  "Reviewer response letters",
-] as const;
-
 function Research() {
   return (
     <motion.section id="research" className="section" {...reveal}>
       <div className="container">
-        <span className="eyebrow">04 · Research and thesis</span>
+        <span className="eyebrow">{HOME_RESEARCH.eyebrow}</span>
         <hr className="rule" />
         <h2 className="h-section" style={{ maxWidth: "24ch" }}>
-          Long-form research with a shared brain and real review gates
+          {HOME_RESEARCH.title}
         </h2>
         <p className="lede" style={{ marginTop: 18 }}>
-          For labs, supervisors, and graduate students: a project library that grows into a
-          knowledge graph, AI that cites what it reads, and supervisor approval built into the
-          workflow.
+          {RESEARCH_LEDE}
         </p>
 
         <div className="grid grid--3" style={{ gap: "clamp(18px, 2.5vw, 36px)", marginTop: 40 }}>
@@ -706,12 +612,10 @@ function Research() {
               className="h-section"
               style={{ fontSize: "clamp(24px, 2.4vw, 32px)", lineHeight: 1.1 }}
             >
-              Integrity by construction
+              {HOME_RESEARCH.integrityTitle}
             </h3>
             <p className="lede" style={{ maxWidth: "52ch", marginTop: 14 }}>
-              Institutions are asking how AI was used. Kerniva answers that question with the event
-              log: which sources were in context, which skill produced the draft, which model was
-              used, and who approved it.
+              {RESEARCH_INTEGRITY_LEDE}
             </p>
             <div className="rows" style={{ marginTop: 22 }}>
               {INTEGRITY.map((line) => (
@@ -725,8 +629,8 @@ function Research() {
 
           <Blueprint style={{ background: "var(--color-bg)" }}>
             <div className="plate__bar">
-              <span>Artifacts researchers generate</span>
-              <span>KV-R1</span>
+              <span>{RESEARCH_ARTIFACTS_TITLE}</span>
+              <span>{HOME_RESEARCH.plateRef}</span>
             </div>
             <div>
               {ARTIFACTS.map((line, i) => (
@@ -752,62 +656,17 @@ function Research() {
 
 /* ---------------------------------------------------------- security --- */
 
-const SECURITY = [
-  {
-    Icon: IdentityIcon,
-    title: "Identity",
-    body: "AWS Cognito with SSO (SAML / OIDC), enforced MFA, and short-lived tokens. Refresh tokens never reach the browser.",
-  },
-  {
-    Icon: LockIcon,
-    title: "Authorization",
-    body: "RBAC plus attribute-based policies evaluated server-side; tenant isolation enforced by forced PostgreSQL row-level security.",
-  },
-  {
-    Icon: ShieldIcon,
-    title: "Data in transit and at rest",
-    body: "TLS 1.3 everywhere; S3, RDS, and queues encrypted with customer-managed KMS keys.",
-  },
-  {
-    Icon: BotIcon,
-    title: "AI data handling",
-    body: "Single-egress AI gateway with zero-retention agreements. Prompts, sources, and model responses are excluded from logs and telemetry.",
-  },
-  {
-    Icon: TiersIcon,
-    title: "Sensitivity tiers",
-    body: "General, restricted, and privileged tiers on every asset; audience views materialized per role with silent redaction.",
-  },
-  {
-    Icon: AuditIcon,
-    title: "Audit",
-    body: "Append-only, tamper-evident event log with hash chaining and SIEM export.",
-  },
-  {
-    Icon: CodeIcon,
-    title: "Application security",
-    body: "OWASP Top 10 program, strict CSP and secure headers, secrets in AWS Secrets Manager, dependency and container scanning in CI.",
-  },
-  {
-    Icon: GlobeIcon,
-    title: "Residency and isolation",
-    body: "Deploy in your AWS region or your own account. Nonproduction and production live in independent accounts with separate state.",
-  },
-] as const;
-
 function Security() {
   return (
     <motion.section id="security" className="section" {...reveal}>
       <div className="container">
-        <span className="eyebrow">05 · Security</span>
+        <span className="eyebrow">{HOME_SECURITY.eyebrow}</span>
         <hr className="rule" />
         <h2 className="h-section" style={{ maxWidth: "24ch" }}>
-          Security is the product, not a page
+          {HOME_SECURITY.title}
         </h2>
         <p className="lede" style={{ marginTop: 18 }}>
-          Kerniva is designed so that the safe path is the only path: secrets never reach clients,
-          agents never write canonical state, and the model only sees what the person asking is
-          allowed to see.
+          {SECURITY_LEDE}
         </p>
 
         <div className="grid grid--3" style={{ gap: "clamp(22px, 3vw, 36px)", marginTop: 44 }}>
@@ -843,7 +702,7 @@ function Security() {
               whiteSpace: "nowrap",
             }}
           >
-            Compliance · Evidence on request
+            {HOME_SECURITY.complianceLabel}
           </span>
           <span
             style={{
@@ -854,11 +713,10 @@ function Security() {
               minWidth: "32ch",
             }}
           >
-            SOC 2 program in progress. We complete SIG and CAIQ questionnaires and provide
-            architecture walkthroughs for enterprise security reviews.
+            {SECURITY_COMPLIANCE_BODY}
           </span>
           <a
-            href="mailto:security@kerniva.app"
+            href={`mailto:${EMAIL_SECURITY}`}
             style={{
               fontFamily: "var(--font-heading)",
               fontWeight: 600,
@@ -868,7 +726,7 @@ function Security() {
               whiteSpace: "nowrap",
             }}
           >
-            security@kerniva.app
+            {EMAIL_SECURITY}
           </a>
         </Blueprint>
       </div>
@@ -878,31 +736,23 @@ function Security() {
 
 /* ----------------------------------------------------------- company --- */
 
-const PRINCIPLES = [
-  "Humans decide; agents propose",
-  "The event log is the truth",
-  "The safe path is the only path",
-] as const;
-
 function Company() {
   return (
     <motion.section id="company" className="section" {...reveal}>
       <div className="container">
-        <span className="eyebrow">06 · Company</span>
+        <span className="eyebrow">{HOME_COMPANY.eyebrow}</span>
         <hr className="rule" />
         <h2 className="h-section" style={{ maxWidth: "24ch" }}>
-          We build AI tools for the work that cannot leak
+          {HOME_COMPANY.title}
         </h2>
         <p className="lede" style={{ marginTop: 18 }}>
-          Kerniva started from a simple observation: the teams with the most to gain from AI are the
-          ones least able to use consumer tools. We are building the workspace they can actually
-          adopt.
+          {COMPANY_LEDE}
         </p>
 
         <div className="split" style={{ marginTop: 44, gap: "clamp(24px, 4vw, 64px)" }}>
           <div>
             <h3 className="h-sub" style={{ fontSize: 20, marginBottom: 12 }}>
-              Principles
+              {HOME_COMPANY.principlesTitle}
             </h3>
             <div className="rows">
               {PRINCIPLES.map((line, i) => (
@@ -915,29 +765,27 @@ function Company() {
           </div>
           <div>
             <h3 className="h-sub" style={{ fontSize: 20, marginBottom: 12 }}>
-              Where we are
+              {HOME_COMPANY.whereTitle}
             </h3>
             <p
               className="lede"
               style={{ borderTop: "1px solid var(--color-divider)", paddingTop: 13 }}
             >
-              Kerniva is in private beta with design partners in enterprise strategy, advisory, and
-              academic research. Production deployments run on AWS with manual release gates.
+              {COMPANY_WHERE}
             </p>
           </div>
           <div>
             <h3 className="h-sub" style={{ fontSize: 20, marginBottom: 12 }}>
-              Work with us
+              {HOME_COMPANY.hiringTitle}
             </h3>
             <p
               className="lede"
               style={{ borderTop: "1px solid var(--color-divider)", paddingTop: 13 }}
             >
-              We are hiring engineers who care about governance, security, and the craft of dense,
-              quiet interfaces.
+              {COMPANY_HIRING}
             </p>
             <a
-              href="mailto:hello@kerniva.app"
+              href={`mailto:${EMAIL_HELLO}`}
               style={{
                 display: "inline-block",
                 marginTop: 14,
@@ -948,7 +796,7 @@ function Company() {
                 textTransform: "uppercase",
               }}
             >
-              hello@kerniva.app
+              {EMAIL_HELLO}
             </a>
           </div>
         </div>
@@ -959,52 +807,11 @@ function Company() {
 
 /* --------------------------------------------------------------- faq --- */
 
-const FAQ = [
-  {
-    q: "What counts as “context” in Kerniva?",
-    a: (
-      <>
-        Research, files, AI sessions, and project decisions, connected to the project in real time.
-        Anything a collaborator would otherwise have to reconstruct stays attached to the work it
-        belongs to.
-      </>
-    ),
-  },
-  {
-    q: "Does my team have to change how it works?",
-    a: (
-      <>
-        No. The team keeps researching, deciding, and running AI sessions the way it already does.
-        Kerniva does the connecting, so the next collaborator can continue without starting over.
-      </>
-    ),
-  },
-  {
-    q: "How is this different from a shared drive or wiki?",
-    a: (
-      <>
-        Drives store artifacts; wikis store write-ups someone had to remember to write. Kerniva
-        keeps the live trail (what was made, by whom, why, and what decision it fed) without asking
-        anyone to document it after the fact.
-      </>
-    ),
-  },
-  {
-    q: "How do we get started?",
-    a: (
-      <>
-        Join the waitlist for a workspace of your own, or <Link to="/demo">book a demo</Link> and we
-        will walk through it on your team’s real work in 30 minutes.
-      </>
-    ),
-  },
-];
-
 function Faq() {
   return (
     <motion.section id="faq" className="section faq" {...reveal}>
       <div className="container">
-        <span className="eyebrow">07 · Questions</span>
+        <span className="eyebrow">{HOME_FAQ_EYEBROW}</span>
         <hr className="rule" style={{ marginBottom: 0 }} />
         {FAQ.map((item) => (
           <Disclosure key={item.q} question={item.q}>
@@ -1022,25 +829,24 @@ function NextStep() {
   return (
     <motion.section className="section" style={{ padding: "48px 0 88px" }} {...reveal}>
       <div className="container">
-        <span className="eyebrow">08 · The next step</span>
+        <span className="eyebrow">{HOME_NEXT_STEP.eyebrow}</span>
         <hr className="rule" style={{ marginBottom: 32 }} />
         <h2
           className="h-section"
           style={{ fontSize: "clamp(34px, 4.4vw, 60px)", lineHeight: 1.05, maxWidth: "20ch" }}
         >
-          See Kerniva on your team’s own work
+          {HOME_NEXT_STEP.title}
         </h2>
         <p className="lede" style={{ maxWidth: "54ch", marginTop: 20 }}>
-          A 30-minute walkthrough on a real project, or a place in the queue for a workspace of your
-          own.
+          {HOME_NEXT_STEP.lede}
         </p>
         <div className="hero__actions">
           <Link to="/demo" className="btn btn--primary btn--lg blueprint">
             <Corners />
-            Book a demo
+            {BTN_BOOK_DEMO}
           </Link>
           <Link to="/waitlist" className="btn btn--secondary btn--lg">
-            Join the waitlist
+            {BTN_JOIN_WAITLIST}
           </Link>
         </div>
       </div>
@@ -1054,7 +860,7 @@ export function HomePage() {
   const [filmOpen, setFilmOpen] = useState(false);
 
   useEffect(() => {
-    document.title = "Kerniva: AI workspace for teams with no time to lose";
+    document.title = TITLE_HOME;
   }, []);
 
   const openFilm = () => setFilmOpen(true);

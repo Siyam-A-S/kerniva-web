@@ -4,28 +4,16 @@ import { AnimatePresence, motion } from "motion/react";
 import { Corners } from "../components/blueprint";
 import { CheckCircleIcon } from "../components/icons";
 import { EASE } from "../components/transitions";
+import {
+  BTN_JOIN_WAITLIST,
+  DEMO_PAGE,
+  DEMO_PROMISES,
+  DEMO_TEAM_SIZES,
+  TAGLINE,
+  TITLE_DEMO,
+} from "../content";
 
 const muted = (pct: number) => `color-mix(in srgb, var(--color-text) ${pct}%, transparent)`;
-
-const PROMISES = [
-  {
-    n: "01",
-    title: "A walkthrough, not a pitch",
-    body: "We set up a workspace live and run a handoff end to end.",
-  },
-  {
-    n: "02",
-    title: "Your stack, your questions",
-    body: "Tell us what your team uses and we will show how it connects.",
-  },
-  {
-    n: "03",
-    title: "Leave with a workspace",
-    body: "Your trial project stays live after the call, so you can keep working in it.",
-  },
-] as const;
-
-const TEAM_SIZES = ["1–10", "11–50", "51–200", "200+"] as const;
 
 /**
  * The demo page deliberately runs outside SiteLayout: the design strips the
@@ -35,7 +23,7 @@ export function DemoPage() {
   const [booked, setBooked] = useState(false);
 
   useEffect(() => {
-    document.title = "Book a demo | Kerniva";
+    document.title = TITLE_DEMO;
   }, []);
 
   function submit(e: FormEvent<HTMLFormElement>) {
@@ -53,14 +41,14 @@ export function DemoPage() {
             <img src="/kerniva-wordmark.svg" alt="Kerniva" style={{ height: 22, width: "auto" }} />
           </Link>
           <Link to="/" style={{ whiteSpace: "nowrap" }}>
-            ← Back to site
+            {DEMO_PAGE.back}
           </Link>
           <Link
             to="/waitlist"
             className="btn btn--ghost"
             style={{ whiteSpace: "nowrap", marginLeft: "auto" }}
           >
-            Join the waitlist instead
+            {DEMO_PAGE.waitlistInstead}
           </Link>
         </div>
       </header>
@@ -72,18 +60,17 @@ export function DemoPage() {
               className="h-display"
               style={{ fontSize: "clamp(40px, 4.6vw, 64px)", lineHeight: 1.05 }}
             >
-              <span style={{ display: "block" }}>Join the design-partner program.</span>
+              <span style={{ display: "block" }}>{DEMO_PAGE.line1}</span>
               <span style={{ display: "block", color: "var(--color-accent-700)" }}>
-                Bring a real project.
+                {DEMO_PAGE.line2}
               </span>
             </h1>
             <p style={{ fontSize: 16, lineHeight: "25px", maxWidth: "52ch", margin: "24px 0 0" }}>
-              Thirty minutes, on your team’s own work. We will show how research, files, AI
-              sessions, and decisions stay connected, so the next collaborator never starts over.
+              {DEMO_PAGE.lede}
             </p>
 
             <div className="rows" style={{ marginTop: 36 }}>
-              {PROMISES.map((item) => (
+              {DEMO_PROMISES.map((item) => (
                 <div key={item.n} style={{ display: "flex", gap: 16, padding: "16px 0" }}>
                   <span
                     style={{
@@ -131,9 +118,9 @@ export function DemoPage() {
           >
             <Corners animated />
             <motion.div layout className="plate__bar">
-              <span>Demo request</span>
-              <span>KV-01</span>
-              <span>30 min</span>
+              <span>{DEMO_PAGE.plateTitle}</span>
+              <span>{DEMO_PAGE.plateRef}</span>
+              <span>{DEMO_PAGE.plateLength}</span>
             </motion.div>
 
             <AnimatePresence mode="wait" initial={false}>
@@ -159,7 +146,7 @@ export function DemoPage() {
                       margin: "18px 0 8px",
                     }}
                   >
-                    Request received
+                    {DEMO_PAGE.bookedTitle}
                   </h2>
                   <p
                     style={{
@@ -170,8 +157,7 @@ export function DemoPage() {
                       color: muted(78),
                     }}
                   >
-                    Check your inbox for a calendar link. In the meantime, you can put your team in
-                    the queue for a workspace of your own.
+                    {DEMO_PAGE.bookedBody}
                   </p>
                   <div
                     style={{
@@ -184,10 +170,10 @@ export function DemoPage() {
                   >
                     <Link to="/waitlist" className="btn btn--primary blueprint">
                       <Corners />
-                      Join the waitlist
+                      {BTN_JOIN_WAITLIST}
                     </Link>
                     <Link to="/" className="btn btn--ghost">
-                      Back to site
+                      {DEMO_PAGE.backToSite}
                     </Link>
                   </div>
                 </motion.div>
@@ -210,18 +196,18 @@ export function DemoPage() {
                     }}
                   >
                     <div className="field">
-                      <label htmlFor="kv-name">Name</label>
+                      <label htmlFor="kv-name">{DEMO_PAGE.name}</label>
                       <input
                         className="input"
                         id="kv-name"
                         name="name"
                         required
                         autoComplete="name"
-                        placeholder="Ada Torres"
+                        placeholder={DEMO_PAGE.namePlaceholder}
                       />
                     </div>
                     <div className="field">
-                      <label htmlFor="kv-email">Work email</label>
+                      <label htmlFor="kv-email">{DEMO_PAGE.email}</label>
                       <input
                         className="input"
                         id="kv-email"
@@ -229,26 +215,26 @@ export function DemoPage() {
                         type="email"
                         required
                         autoComplete="email"
-                        placeholder="ada@company.com"
+                        placeholder={DEMO_PAGE.emailPlaceholder}
                       />
                     </div>
                   </div>
 
                   <div className="field">
-                    <label htmlFor="kv-company">Company</label>
+                    <label htmlFor="kv-company">{DEMO_PAGE.company}</label>
                     <input
                       className="input"
                       id="kv-company"
                       name="company"
                       autoComplete="organization"
-                      placeholder="Acme Studio"
+                      placeholder={DEMO_PAGE.companyPlaceholder}
                     />
                   </div>
 
                   <div className="field">
-                    <label id="kv-size-label">Team size</label>
+                    <label id="kv-size-label">{DEMO_PAGE.teamSize}</label>
                     <div className="seg" role="radiogroup" aria-labelledby="kv-size-label">
-                      {TEAM_SIZES.map((size, i) => (
+                      {DEMO_TEAM_SIZES.map((size, i) => (
                         <label className="seg-opt" key={size}>
                           <input
                             type="radio"
@@ -264,15 +250,17 @@ export function DemoPage() {
 
                   <div className="field">
                     <label htmlFor="kv-notes">
-                      What should we focus on?{" "}
-                      <span style={{ fontWeight: 400, color: muted(55) }}>(optional)</span>
+                      {DEMO_PAGE.notes}{" "}
+                      <span style={{ fontWeight: 400, color: muted(55) }}>
+                        {DEMO_PAGE.notesOptional}
+                      </span>
                     </label>
                     <textarea
                       className="input"
                       id="kv-notes"
                       name="notes"
                       rows={3}
-                      placeholder="e.g. handoffs between our research and design teams"
+                      placeholder={DEMO_PAGE.notesPlaceholder}
                     />
                   </div>
 
@@ -282,12 +270,11 @@ export function DemoPage() {
                     style={{ padding: 11, fontSize: 15 }}
                   >
                     <Corners />
-                    Book my demo
+                    {DEMO_PAGE.submit}
                   </button>
 
                   <p style={{ fontSize: 12.5, margin: 0, color: muted(60) }}>
-                    We reply within one business day with a calendar link. No mailing list, no
-                    follow-up sequence.
+                    {DEMO_PAGE.finePrint}
                   </p>
                 </motion.form>
               )}
@@ -295,7 +282,7 @@ export function DemoPage() {
 
             <motion.div layout className="statusbar">
               <span className="dot-live" />
-              Live slots this week · Tue to Fri, 9:00 to 17:00 CET
+              {DEMO_PAGE.slots}
             </motion.div>
           </motion.div>
         </div>
@@ -305,7 +292,7 @@ export function DemoPage() {
           style={{ borderTop: "1px solid var(--color-divider)" }}
         >
           <img src="/kerniva-wordmark.svg" alt="Kerniva" />
-          <span>AI workspace for teams with no time to lose</span>
+          <span>{TAGLINE}</span>
           <span className="end">© {new Date().getFullYear()} Kerniva</span>
         </footer>
       </main>

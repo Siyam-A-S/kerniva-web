@@ -2,6 +2,13 @@ import { useState, type FormEvent } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { PageHeader } from "../components/page-header";
 import { EASE } from "../components/transitions";
+import {
+  CONTACT_INTERESTS,
+  CONTACT_PAGE,
+  EMAIL_HELLO,
+  EMAIL_RESEARCH,
+  EMAIL_SECURITY,
+} from "../content";
 
 export function ContactPage() {
   const [sent, setSent] = useState(false);
@@ -13,9 +20,9 @@ export function ContactPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Contact"
-        title="Talk to the team."
-        lede="Tell us about your team, your material, and what you need to see before you can adopt an AI workspace."
+        eyebrow={CONTACT_PAGE.eyebrow}
+        title={CONTACT_PAGE.title}
+        lede={CONTACT_PAGE.lede}
       />
       <section className="section">
         <div className="container split" style={{ alignItems: "start" }}>
@@ -32,7 +39,7 @@ export function ContactPage() {
                   exit={{ opacity: 0, y: -12 }}
                   transition={{ duration: 0.35, ease: EASE }}
                 >
-                  <div className="notice">Thank you. We will reply within two business days.</div>
+                  <div className="notice">{CONTACT_PAGE.sent}</div>
                 </motion.div>
               ) : (
                 <motion.div
@@ -45,32 +52,33 @@ export function ContactPage() {
                   transition={{ duration: 0.35, ease: EASE }}
                 >
                   <label>
-                    Name
+                    {CONTACT_PAGE.name}
                     <input name="name" required autoComplete="name" />
                   </label>
                   <label>
-                    Work email
+                    {CONTACT_PAGE.email}
                     <input name="email" type="email" required autoComplete="email" />
                   </label>
                   <label>
-                    Organization
+                    {CONTACT_PAGE.org}
                     <input name="org" autoComplete="organization" />
                   </label>
                   <label>
-                    I am interested in
+                    {CONTACT_PAGE.interest}
                     <select name="interest" defaultValue="enterprise">
-                      <option value="enterprise">Enterprise workspace</option>
-                      <option value="research">Research & thesis</option>
-                      <option value="security">Security review</option>
-                      <option value="other">Something else</option>
+                      {CONTACT_INTERESTS.map((interest) => (
+                        <option value={interest.value} key={interest.value}>
+                          {interest.label}
+                        </option>
+                      ))}
                     </select>
                   </label>
                   <label>
-                    Message
+                    {CONTACT_PAGE.message}
                     <textarea name="message" rows={5} />
                   </label>
                   <button className="btn btn--primary" type="submit">
-                    Send
+                    {CONTACT_PAGE.submit}
                   </button>
                 </motion.div>
               )}
@@ -79,17 +87,19 @@ export function ContactPage() {
           <div>
             <div className="rule" />
             <h2 className="h-section" style={{ fontSize: 26, marginBottom: 12 }}>
-              Direct lines
+              {CONTACT_PAGE.directTitle}
             </h2>
             <ul className="feature-list">
               <li>
-                Sales and partnerships: <a href="mailto:hello@kerniva.app">hello@kerniva.app</a>
+                {CONTACT_PAGE.salesLabel} <a href={`mailto:${EMAIL_HELLO}`}>{EMAIL_HELLO}</a>
               </li>
               <li>
-                Security reviews: <a href="mailto:security@kerniva.app">security@kerniva.app</a>
+                {CONTACT_PAGE.securityLabel}{" "}
+                <a href={`mailto:${EMAIL_SECURITY}`}>{EMAIL_SECURITY}</a>
               </li>
               <li>
-                Research programs: <a href="mailto:research@kerniva.app">research@kerniva.app</a>
+                {CONTACT_PAGE.researchLabel}{" "}
+                <a href={`mailto:${EMAIL_RESEARCH}`}>{EMAIL_RESEARCH}</a>
               </li>
             </ul>
           </div>

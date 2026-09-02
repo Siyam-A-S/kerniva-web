@@ -898,7 +898,7 @@ textarea.input {
   color: var(--color-accent);
 }
 
-/* The reference bar is a single row of seven links and three buttons, which
+/* The reference bar is a single row of six links and three buttons, which
    overflows long before 360px. Below 1080px it collapses into the panel. */
 @media (min-width: 1081px) {
   .site-nav-panel {

@@ -39,9 +39,6 @@ export function SiteFooter() {
               <li>
                 <Link to="/solutions#consulting">Consulting and advisory</Link>
               </li>
-              <li>
-                <Link to="/research">Universities and labs</Link>
-              </li>
             </ul>
           </div>
           <div>

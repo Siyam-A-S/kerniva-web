@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import { Corners } from "./blueprint";
+import { BTN_BOOK_DEMO, BTN_JOIN_WAITLIST, CTA_DEFAULT } from "../content";
 
 export function Cta({
-  title = "Kerniva is best experienced with real work",
-  body = "See how Kerniva fits your team’s material and workflow through a tailored session, or explore a live workspace when early access opens.",
+  title = CTA_DEFAULT.title,
+  body = CTA_DEFAULT.body,
 }: {
   title?: string;
   body?: string;
@@ -18,11 +19,11 @@ export function Cta({
           </div>
           <div className="hero__actions">
             <Link to="/waitlist" className="btn btn--secondary btn--lg">
-              Join the waitlist
+              {BTN_JOIN_WAITLIST}
             </Link>
             <Link to="/demo" className="btn btn--primary btn--lg blueprint">
               <Corners />
-              Book a demo
+              {BTN_BOOK_DEMO}
             </Link>
           </div>
         </div>

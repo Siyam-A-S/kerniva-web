@@ -1,13 +1,14 @@
 import { PageHeader } from "../components/page-header";
 import { WaitlistForm } from "../components/waitlist-form";
+import { EMAIL_HELLO, WAITLIST_PAGE } from "../content";
 
 export function WaitlistPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Early access"
-        title="The live simulation is almost ready."
-        lede="Try Kerniva will give you a real workspace of your own: upload a document, ask the brain, drive a Relay session, approve an artifact. We are opening it in small waves. Leave your email and you will get access in the next one."
+        eyebrow={WAITLIST_PAGE.eyebrow}
+        title={WAITLIST_PAGE.title}
+        lede={WAITLIST_PAGE.lede}
       />
       <section className="section">
         <div className="container split" style={{ alignItems: "start" }}>
@@ -15,17 +16,15 @@ export function WaitlistPage() {
           <div>
             <div className="rule" />
             <h2 className="h-section" style={{ fontSize: 26, marginBottom: 12 }}>
-              What you will get
+              {WAITLIST_PAGE.getTitle}
             </h2>
             <ul className="feature-list">
-              <li>A clean project with a sample library, just for you, no account needed</li>
-              <li>The real product: Relay, Library, proposals, Cockpit, the event log</li>
-              <li>A generous model budget for a full guided session</li>
-              <li>Everything disposable: your sandbox is wiped when it ends</li>
+              {WAITLIST_PAGE.getPoints.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
             </ul>
             <p style={{ marginTop: 20, color: "var(--muted)" }}>
-              Can&apos;t wait? A working session with the team is the fastest way to see Kerniva on
-              your own material: <a href="mailto:hello@kerniva.app">hello@kerniva.app</a>.
+              {WAITLIST_PAGE.impatient} <a href={`mailto:${EMAIL_HELLO}`}>{EMAIL_HELLO}</a>.
             </p>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion, spring } from "motion/react";
 import { Logo } from "./logo";
 import { Corners } from "./blueprint";
@@ -7,16 +7,15 @@ import { SectionLink } from "./section-link";
 import { riseIn } from "./transitions";
 
 /**
- * Sticky, blurred bar over a hairline. Most entries point at sections of the
- * landing page, as the design does; Pricing keeps its own route, since the
- * landing has no pricing section.
+ * Sticky, blurred bar over a hairline. Every entry points at a section of the
+ * landing page, as the design does. Pages that are not sections of the landing
+ * (Pricing among them) are reached from the footer.
  */
 const links = [
   { hash: "product", label: "Product" },
   { hash: "how", label: "Solutions" },
   { hash: "research", label: "Research" },
   { hash: "security", label: "Security" },
-  { to: "/pricing", label: "Pricing" },
   { hash: "company", label: "Company" },
   { hash: "faq", label: "FAQ" },
 ] as const;
@@ -27,22 +26,11 @@ const COMPACT = "(max-width: 1080px)";
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <>
-      {links.map((link) =>
-        "to" in link ? (
-          <NavLink
-            key={link.label}
-            to={link.to}
-            onClick={onNavigate}
-            className={({ isActive }) => (isActive ? "active" : "")}
-          >
-            {link.label}
-          </NavLink>
-        ) : (
-          <SectionLink key={link.label} hash={link.hash} onClick={onNavigate}>
-            {link.label}
-          </SectionLink>
-        ),
-      )}
+      {links.map((link) => (
+        <SectionLink key={link.label} hash={link.hash} onClick={onNavigate}>
+          {link.label}
+        </SectionLink>
+      ))}
     </>
   );
 }
