@@ -5,9 +5,10 @@ import { EASE } from "../components/transitions";
 import {
   CONTACT_INTERESTS,
   CONTACT_PAGE,
-  EMAIL_HELLO,
   EMAIL_RESEARCH,
+  EMAIL_SALES,
   EMAIL_SECURITY,
+  EMAIL_SUPPORT,
 } from "../content";
 
 export function ContactPage() {
@@ -91,7 +92,10 @@ export function ContactPage() {
             </h2>
             <ul className="feature-list">
               <li>
-                {CONTACT_PAGE.salesLabel} <a href={`mailto:${EMAIL_HELLO}`}>{EMAIL_HELLO}</a>
+                {CONTACT_PAGE.salesLabel} <a href={`mailto:${EMAIL_SALES}`}>{EMAIL_SALES}</a>
+              </li>
+              <li>
+                {CONTACT_PAGE.supportLabel} <a href={`mailto:${EMAIL_SUPPORT}`}>{EMAIL_SUPPORT}</a>
               </li>
               <li>
                 {CONTACT_PAGE.securityLabel}{" "}

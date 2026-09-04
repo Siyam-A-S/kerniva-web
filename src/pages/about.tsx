@@ -5,7 +5,7 @@ import {
   COMPANY_HIRING,
   COMPANY_LEDE,
   COMPANY_WHERE,
-  EMAIL_HELLO,
+  EMAIL_CONTACT,
   PRINCIPLES,
 } from "../content";
 
@@ -31,7 +31,7 @@ export function AboutPage() {
             <h3>{ABOUT_PAGE.hiringTitle}</h3>
             <p>
               {COMPANY_HIRING} {ABOUT_PAGE.hiringWriteTo}{" "}
-              <a href={`mailto:${EMAIL_HELLO}`}>{EMAIL_HELLO}</a>.
+              <a href={`mailto:${EMAIL_CONTACT}`}>{EMAIL_CONTACT}</a>.
             </p>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { PageHeader } from "../components/page-header";
 import { WaitlistForm } from "../components/waitlist-form";
-import { EMAIL_HELLO, WAITLIST_PAGE } from "../content";
+import { EMAIL_CONTACT, WAITLIST_PAGE } from "../content";
 
 export function WaitlistPage() {
   return (
@@ -24,7 +24,7 @@ export function WaitlistPage() {
               ))}
             </ul>
             <p style={{ marginTop: 20, color: "var(--muted)" }}>
-              {WAITLIST_PAGE.impatient} <a href={`mailto:${EMAIL_HELLO}`}>{EMAIL_HELLO}</a>.
+              {WAITLIST_PAGE.impatient} <a href={`mailto:${EMAIL_CONTACT}`}>{EMAIL_CONTACT}</a>.
             </p>
           </div>
         </div>

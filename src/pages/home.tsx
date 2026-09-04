@@ -16,7 +16,7 @@ import {
   COMPANY_HIRING,
   COMPANY_LEDE,
   COMPANY_WHERE,
-  EMAIL_HELLO,
+  EMAIL_CONTACT,
   EMAIL_SECURITY,
   FAQ,
   HOME_COMPANY,
@@ -785,7 +785,7 @@ function Company() {
               {COMPANY_HIRING}
             </p>
             <a
-              href={`mailto:${EMAIL_HELLO}`}
+              href={`mailto:${EMAIL_CONTACT}`}
               style={{
                 display: "inline-block",
                 marginTop: 14,
@@ -796,7 +796,7 @@ function Company() {
                 textTransform: "uppercase",
               }}
             >
-              {EMAIL_HELLO}
+              {EMAIL_CONTACT}
             </a>
           </div>
         </div>

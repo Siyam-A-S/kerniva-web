@@ -54,7 +54,7 @@ export function SiteFooter() {
                 <Link to="/contact">Contact</Link>
               </li>
               <li>
-                <a href="mailto:hello@kerniva.app">hello@kerniva.app</a>
+                <a href="mailto:contact@kerniva.app">contact@kerniva.app</a>
               </li>
             </ul>
           </div>

@@ -44,7 +44,13 @@ export const TAGLINE = "AI workspace for teams with no time to lose";
 export const TITLE_HOME = "Kerniva: AI workspace for teams with no time to lose";
 export const TITLE_DEMO = "Book a demo | Kerniva";
 
-export const EMAIL_HELLO = "hello@kerniva.app";
+/**
+ * The three public addresses are Google Groups, not per-person aliases, so
+ * membership can change without the published address changing.
+ */
+export const EMAIL_CONTACT = "contact@kerniva.app";
+export const EMAIL_SALES = "sales@kerniva.app";
+export const EMAIL_SUPPORT = "support@kerniva.app";
 export const EMAIL_SECURITY = "security@kerniva.app";
 export const EMAIL_RESEARCH = "research@kerniva.app";
 
@@ -689,6 +695,7 @@ export const CONTACT_PAGE = {
   submit: "Send",
   directTitle: "Direct lines",
   salesLabel: "Sales and partnerships:",
+  supportLabel: "Support:",
   securityLabel: "Security reviews:",
   researchLabel: "Research programs:",
 } as const;
