@@ -1,5 +1,5 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { FORM_KINDS, MAX_BODY_BYTES, type FormKind } from "../../shared/forms.js";
+import { EMAIL_CONTACT, FORM_KINDS, MAX_BODY_BYTES, type FormKind } from "../../shared/forms.js";
 import {
   checkToken,
   issueToken,
@@ -16,13 +16,18 @@ const PORT = Number(process.env.PORT ?? 8080);
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "https://kerniva.app";
 
 /**
- * In production a missing SMTP config means every submission is silently
- * dropped, so refuse to start instead. In development the dry run logs what
- * it would have sent.
+ * A missing SMTP config in production must not drop submissions silently, but
+ * it must not take the site down either: this process shares a container with
+ * the nginx that serves the marketing pages. So it starts, says so loudly, and
+ * refuses submissions with an error the visitor can act on. In development the
+ * dry run just logs what it would have sent.
  */
-if (isDryRun() && process.env.NODE_ENV === "production") {
-  console.error("SMTP_HOST is not set; refusing to start in production.");
-  process.exit(1);
+const MAIL_MISCONFIGURED = isDryRun() && process.env.NODE_ENV === "production";
+if (MAIL_MISCONFIGURED) {
+  console.error(
+    "SMTP_HOST is not set: the site still serves, but form submissions will be " +
+      "refused until the SMTP_* variables are provided.",
+  );
 }
 initMail();
 
@@ -71,7 +76,12 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
   const path = url.pathname.replace(/\/+$/, "") || "/";
 
   if (path === "/api/health") {
-    return json(res, 200, { ok: true, dryRun: isDryRun(), sentToday: sentTodayCount() });
+    return json(res, 200, {
+      ok: true,
+      dryRun: isDryRun(),
+      mailConfigured: !MAIL_MISCONFIGURED,
+      sentToday: sentTodayCount(),
+    });
   }
 
   const ip = clientIp(req);
@@ -124,6 +134,14 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
     // A tripped honeypot gets the success it expects, and nothing else.
     if (result.reason === "honeypot") return json(res, 200, { ok: true });
     return json(res, 400, { ok: false, error: result.reason });
+  }
+
+  if (MAIL_MISCONFIGURED) {
+    console.error(`mail is not configured; refusing ${kind} submission`);
+    return json(res, 503, {
+      ok: false,
+      error: `We could not send that. Please email ${EMAIL_CONTACT}.`,
+    });
   }
 
   if (overDailyCap()) {

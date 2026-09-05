@@ -1,29 +1,32 @@
 #!/bin/sh
-# Runs the form API on loopback and nginx in front of it. If either dies the
-# container exits, so the platform restarts the pair rather than leaving a
-# half-broken site serving pages with a dead /api.
-set -eu
+# nginx is the reason this container exists: the marketing site must stay up
+# even when the forms API cannot. So the API is supervised and restarted, but
+# only nginx exiting brings the container down. A missing mail credential
+# degrades the forms; it must never 404 the site.
+set -u
 
-api_pid=""
-nginx_pid=""
-
-stop() {
-  [ -n "$api_pid" ] && kill -TERM "$api_pid" 2>/dev/null || true
-  [ -n "$nginx_pid" ] && kill -TERM "$nginx_pid" 2>/dev/null || true
+api() {
+  while true; do
+    node /srv/api/dist/api/src/index.js || true
+    echo "kerniva: forms api exited; restarting in 5s" >&2
+    sleep 5
+  done
 }
-trap stop TERM INT
 
-node /srv/api/dist/api/src/index.js &
+api &
 api_pid=$!
 
 nginx -g 'daemon off;' &
 nginx_pid=$!
 
-while kill -0 "$api_pid" 2>/dev/null && kill -0 "$nginx_pid" 2>/dev/null; do
-  sleep 1
-done
+stop() {
+  kill -TERM "$nginx_pid" 2>/dev/null || true
+  kill -TERM "$api_pid" 2>/dev/null || true
+}
+trap stop TERM INT
 
-echo "kerniva: a supervised process exited; shutting the container down" >&2
-stop
-wait 2>/dev/null || true
-exit 1
+wait "$nginx_pid"
+status=$?
+echo "kerniva: nginx exited ($status); shutting the container down" >&2
+kill -TERM "$api_pid" 2>/dev/null || true
+exit "$status"
