@@ -1,20 +1,19 @@
-import { useState, type FormEvent } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { EASE } from "./transitions";
 import { BTN_JOIN_WAITLIST, WAITLIST_FORM, WAITLIST_WORK_KINDS } from "../content";
+import { useFormSubmit } from "../forms/submit";
+import { Honeypot } from "../forms/honeypot";
+
+const FIELDS = ["name", "email", "org", "work"] as const;
 
 /**
  * The waitlist form shown everywhere the live simulation used to be offered.
- * Client-side only for now; the endpoint is a TODO alongside the contact form.
+ * Posts to the same-origin forms API; a failed send surfaces as an error
+ * rather than a confirmation.
  */
 export function WaitlistForm({ compact = false }: { compact?: boolean }) {
-  const [sent, setSent] = useState(false);
-
-  function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    // TODO: POST to the waitlist endpoint once provisioned (same backend as contact).
-    setSent(true);
-  }
+  const { state, onSubmit } = useFormSubmit("waitlist", FIELDS);
+  const sending = state.status === "sending";
 
   const swap = {
     layout: true,
@@ -27,9 +26,9 @@ export function WaitlistForm({ compact = false }: { compact?: boolean }) {
   return (
     // `layout` so the surrounding card resizes with its contents instead of
     // snapping when the fields give way to the confirmation.
-    <motion.form layout className={compact ? undefined : "card"} onSubmit={submit}>
+    <motion.form layout className={compact ? undefined : "card"} onSubmit={onSubmit}>
       <AnimatePresence mode="wait" initial={false}>
-        {sent ? (
+        {state.status === "sent" ? (
           <motion.div key="sent" {...swap}>
             <div className="notice">{WAITLIST_FORM.sent}</div>
           </motion.div>
@@ -57,9 +56,15 @@ export function WaitlistForm({ compact = false }: { compact?: boolean }) {
                 ))}
               </select>
             </label>
-            <button className="btn btn--primary" type="submit">
-              {BTN_JOIN_WAITLIST}
+            <Honeypot />
+            <button className="btn btn--primary" type="submit" disabled={sending}>
+              {sending ? WAITLIST_FORM.submitting : BTN_JOIN_WAITLIST}
             </button>
+            {state.status === "error" ? (
+              <div className="notice notice--error" role="alert">
+                {state.message}
+              </div>
+            ) : null}
             <small style={{ color: "var(--muted)" }}>{WAITLIST_FORM.note}</small>
           </motion.div>
         )}

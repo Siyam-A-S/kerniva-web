@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { Corners } from "../components/blueprint";
@@ -12,6 +12,10 @@ import {
   TAGLINE,
   TITLE_DEMO,
 } from "../content";
+import { useFormSubmit } from "../forms/submit";
+import { Honeypot } from "../forms/honeypot";
+
+const FIELDS = ["name", "email", "company", "teamSize", "notes"] as const;
 
 const muted = (pct: number) => `color-mix(in srgb, var(--color-text) ${pct}%, transparent)`;
 
@@ -20,18 +24,12 @@ const muted = (pct: number) => `color-mix(in srgb, var(--color-text) ${pct}%, tr
  * full site nav down to a way back and a single alternative.
  */
 export function DemoPage() {
-  const [booked, setBooked] = useState(false);
+  const { state, onSubmit } = useFormSubmit("demo", FIELDS);
+  const sending = state.status === "sending";
 
   useEffect(() => {
     document.title = TITLE_DEMO;
   }, []);
-
-  function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    // TODO: POST to the demo-request endpoint once provisioned (same backend
-    // as the contact and waitlist forms).
-    setBooked(true);
-  }
 
   return (
     <>
@@ -124,7 +122,7 @@ export function DemoPage() {
             </motion.div>
 
             <AnimatePresence mode="wait" initial={false}>
-              {booked ? (
+              {state.status === "sent" ? (
                 <motion.div
                   layout
                   key="booked"
@@ -181,7 +179,7 @@ export function DemoPage() {
                 <motion.form
                   layout
                   key="form"
-                  onSubmit={submit}
+                  onSubmit={onSubmit}
                   style={{ display: "flex", flexDirection: "column", gap: 18, padding: 24 }}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -238,7 +236,7 @@ export function DemoPage() {
                         <label className="seg-opt" key={size}>
                           <input
                             type="radio"
-                            name="team-size"
+                            name="teamSize"
                             value={size}
                             defaultChecked={i === 0}
                           />
@@ -264,14 +262,21 @@ export function DemoPage() {
                     />
                   </div>
 
+                  <Honeypot />
                   <button
                     type="submit"
                     className="btn btn--primary btn--block blueprint"
                     style={{ padding: 11, fontSize: 15 }}
+                    disabled={sending}
                   >
                     <Corners />
-                    {DEMO_PAGE.submit}
+                    {sending ? DEMO_PAGE.submitting : DEMO_PAGE.submit}
                   </button>
+                  {state.status === "error" ? (
+                    <div className="notice notice--error" role="alert">
+                      {state.message}
+                    </div>
+                  ) : null}
 
                   <p style={{ fontSize: 12.5, margin: 0, color: muted(60) }}>
                     {DEMO_PAGE.finePrint}

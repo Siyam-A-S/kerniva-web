@@ -1,0 +1,28 @@
+{
+  "name": "@kerniva/forms-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Form intake for kerniva.app: validates submissions and mails them to the team.",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@10.14.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "check": "tsc -b --pretty false",
+    "start": "node dist/api/src/index.js",
+    "dev": "node --watch dist/api/src/index.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.16"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/nodemailer": "^6.4.17",
+    "typescript": "~5.9.0",
+    "vitest": "^3.2.7"
+  }
+}

@@ -13,18 +13,57 @@ pnpm check          # tsc -b, the only lint
 pnpm test           # vitest; `src/routes.test.tsx` renders every route server-side
 pnpm build          # tsc -b && vite build → dist/
 pnpm format         # prettier (CI runs format:check)
+
+cd api && pnpm build   # tsc -b, compiles the forms API to api/dist
+cd api && pnpm test    # the API's own vitest (root `pnpm test` also picks these up)
 ```
 
 Toolchain pinned in `mise.toml` (Node 24, pnpm 10.14.0). `node` is not on PATH without mise: `mise exec -- pnpm …` or prepend `~/.local/share/mise/installs/node/24/bin`. There is no `docker` here, so use `podman` (e.g. to validate nginx: `podman run --rm -v $PWD/nginx.conf:/etc/nginx/conf.d/default.conf:ro --entrypoint sh docker.io/library/nginx:1.27-alpine -c 'nginx -t'`).
 
 ## Waitlist mode (current) and the two "demos"
 
-Primary CTAs are split between `/demo` (Book a Demo, `src/pages/demo.tsx`) and `/waitlist` (`src/pages/waitlist.tsx` + `components/waitlist-form.tsx`). All three forms (contact, waitlist, demo request) flip local state only; their endpoints are TODOs. The SPA route `/try` renders the waitlist page so old links land well. The hero's "Try it now" and the "Watch it work" button under the How it works steps both open the one video modal (`components/video-modal.tsx`), not the sandbox. The closing CTA's second button still points at `/waitlist`.
+Primary CTAs are split between `/demo` (Book a Demo, `src/pages/demo.tsx`) and `/waitlist` (`src/pages/waitlist.tsx` + `components/waitlist-form.tsx`). All three forms (contact, waitlist, demo request) post to the forms API described below and mail the submission to the team. The SPA route `/try` renders the waitlist page so old links land well. The hero's "Try it now" and the "Watch it work" button under the How it works steps both open the one video modal (`components/video-modal.tsx`), not the sandbox. The closing CTA's second button still points at `/waitlist`.
 
 **The launch film.** The handoff shipped no mp4 (its reference points at an `uploads/` folder that was never included); the file in `public/` was supplied separately. `VideoModal` reads two constants: `LAUNCH_FILM = "/launch-film.mp4"` (present: 18 MB, H.264 720p60 + AAC stereo, 45s, faststart) and `LAUNCH_FILM_POSTER = "/launch-film-poster.jpg"` (not present; harmless, the player falls back to its own first frame). The master lives in `media-src/` (gitignored) and is transcoded into `public/`: **never put a video master in `public/`**, Vite copies that directory verbatim and it would ship. Encode with `-movflags +faststart` so playback starts before the download finishes, and keep it small: Coolify rebuilds the image from this repo on every push to `main`, so the film's weight lands on every deploy. `nginx.conf` caches media for a week by extension; the name is unhashed, so rename the file to bust it. The two simulations, both currently unreachable by design:
 
 - **`/try`**: the real thing: a full Kerniva stack in sandbox mode built from the monorepo's `try-kerniva-simulation` branch (images `kerniva-api`/`kerniva-worker`/`kerniva-try-web`, compose in `../kerniva/infra/coolify/`). When re-enabling it, restore the nginx proxy + rate limits, `kerniva-proxy.inc`, the Dockerfile `TRY_IMAGE` stage, and the workflow `try_tag` input from commit `ec6f2df`, and switch CTAs back to plain `<a href="/try">` (not `<Link>`, because nginx must intercept before the SPA).
 - **`src/demo/`**: the scripted, client-only preview (`model.ts` = data model + keyword-matched agent, `demo-page.tsx` = reducer where every action appends to a project event log). Currently not routed but kept compiling. Preserve the product rule there: agents propose, only the driver approves, artifacts appear only after approval, assets above the project's max tier are excluded from context.
+
+## The forms API
+
+`api/` is a small Node service that validates a form submission and mails it to
+the team. It listens on loopback inside the site container and nginx proxies
+`/api/` to it, so the browser only ever sees one origin and the CSP needs no
+`connect-src` exception. That is the main reason it is not a separate service:
+a second origin would mean editing the CSP in two files and enabling CORS.
+
+- **`shared/forms.ts` is the wire contract**, imported by both the browser and
+  the API so validation cannot drift. Field names, length caps, the allowed
+  values for every select, and the routing table live there. `src/content.tsx`
+  re-exports the addresses and pairs the values with labels; only labels are
+  copy.
+- **Never iterate the request body into an email.** The server reads only the
+  fields `FORM_FIELDS` declares. Anything reaching a mail header goes through
+  `headerSafe`, which collapses line breaks: without it a crafted name injects
+  extra headers and the form becomes an open relay.
+- **`From` is always our own address**, with the visitor in `Reply-To`. Sending
+  as the visitor fails SPF and DMARC.
+- Guardrails, in the order they run: nginx `limit_req` and an 8k body cap, then
+  in-app per-IP sliding windows (10/min, 30/hour), Origin check, a required
+  `application/json` content type (which a cross-site form cannot send without
+  a preflight this server refuses), an HMAC-signed form token that must be at
+  least three seconds old, a honeypot field, and a daily send cap that bounds
+  the damage if the rest fail. Cloudflare Turnstile is the documented next step
+  and would need `challenges.cloudflare.com` in the CSP in **both**
+  `nginx.conf` and `infra/opentofu/main.tf`.
+- Configuration is environment only; see `api/.env.example`. **In production a
+  missing `SMTP_HOST` makes the API refuse to start**, because the alternative
+  is silently discarding leads. Without it in development it runs in dry-run
+  mode and logs what it would have sent.
+- `FORM_TOKEN_SECRET` should be set explicitly. If it is not, the API generates
+  one at boot and every in-flight form token breaks on restart.
+- `pnpm dev` proxies `/api` to `127.0.0.1:8080` (`KERNIVA_API_PORT` overrides),
+  so run `cd api && pnpm build && pnpm start` alongside it to exercise a form.
 
 ## Hosting (current): Coolify + Cloudflare, build-from-source
 
@@ -36,7 +75,7 @@ Cloudflare (proxied DNS, WAF, rate limits, cache)
 ```
 
 - Deploys are **build-from-source**: the Coolify GitHub App watches this repo and rebuilds the `Dockerfile` on push to `main`, with no registry in the loop. The GitHub App needs Coolify's dashboard reachable by GitHub (instance domain, e.g. `https://coolify.kerniva.app`) or auto-deploy webhooks won't fire.
-- `Dockerfile`: builds the site and ships `dist/` in `nginx:1.27-alpine` with `nginx.conf`. Static only: no simulation bundle, no API proxy. Use the Dockerfile build pack (not Static/nixpacks): the nginx config carries the security headers, CSP, and www redirect.
+- `Dockerfile`: builds the site and the forms API, then ships `dist/` in `nginx:1.27-alpine` with `nginx.conf` and runs the API alongside it on loopback (`docker-entrypoint.sh` supervises both, and the container exits if either dies). No simulation bundle. Use the Dockerfile build pack (not Static/nixpacks): the nginx config carries the security headers, CSP, and www redirect.
 - `.github/workflows/deploy-coolify.yml`: builds and publishes `ghcr.io/siyam-a-s/kerniva-site` on every push to `main`, then notifies Coolify. It is the escape hatch from the broken GitHub App webhook (see the `coolify.kerniva.app` note below) and needs no DNS, since the runner calls Coolify directly. Dormant until repo variable `COOLIFY_WEBHOOK_URL` + secret `COOLIFY_TOKEN` are set and the Coolify application is switched from the Dockerfile build pack to Docker Image. The monorepo's `../kerniva/infra/coolify/docker-compose.yml` still references that image for when the full simulation stack returns.
 - `nginx.conf`: security headers + CSP declared once via maps (server-level `add_header` is dropped in any location that adds its own — keep it that way), `www` → apex redirect, an https bounce keyed on Cloudflare's `CF-Visitor` header (Traefik/cloudflared always deliver plain HTTP, so `X-Forwarded-Proto` is meaningless here), 404 for dotfiles (with `/.well-known/security.txt` carved out), SPA fallback. `.dockerignore` keeps `.git`/`node_modules`/`infra` out of the build context.
 - `www.kerniva.app` is **not live**: it has no DNS record, so the `www` redirect in `nginx.conf` never gets reached. Serving it needs two manual steps outside this repo: a proxied `www` CNAME to the apex in Cloudflare, and `https://www.kerniva.app` added to the Coolify application's Domains field so Traefik routes that host. Apex stays canonical (`og:url`, `<link rel="canonical">`, `sitemap.xml`); `www` only ever 301s to it. The AWS path in `infra/opentofu/main.tf` already models both (ACM SAN, CloudFront alias, Route 53 record, viewer-request redirect).
@@ -71,4 +110,4 @@ Cloudflare WAF/Bot Fight Mode in front; `public/robots.txt` allows the marketing
 - Both marquees (the integrations tiles and the backer strip) put their gap on **each item** as `margin-left`/`margin-right`, never as `gap` on the track. `kv-marquee` shifts the track by `translateX(-50%)`, which only equals exactly one set width if every item's box carries its own trailing space; with `gap` on the track the loop lands half a gap short and visibly jumps once per cycle.
 - Partner marks in the backer strip (`components/backers.tsx`) are inline SVG and live text, never images: no request, no grayscale filter, crisp at any density. Tool logos in the integrations marquee are **vendored** into `public/logos/` rather than pulled from `cdn.simpleicons.org`, so the CSP stays as tight as it is. Adding an external image or script means editing the CSP in both `nginx.conf` and `infra/opentofu/main.tf`.
 - The landing page's nav entries are anchors into its own sections (`#product`, `#how`, `#research`, `#security`, `#company`, `#faq`); `components/section-link.tsx` renders a plain anchor on `/` and a router link elsewhere. The standalone routes (`/product`, `/research`, `/security`, `/about`, ...) still exist and stay reachable from the footer.
-- All three forms flip local state only; the backend endpoints are still TODOs (`src/pages/contact.tsx`, `src/components/waitlist-form.tsx`, `src/pages/demo.tsx`).
+- All three forms go through `useFormSubmit` in `src/forms/submit.ts`, which owns the token, the honeypot, the in-flight state, and the error path. A failed send must never render as a confirmation.

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import type { ContactInterest, DemoTeamSize, WaitlistWork } from "../shared/forms";
 import {
   AuditIcon,
   BotIcon,
@@ -46,13 +47,11 @@ export const TITLE_DEMO = "Book a demo | Kerniva";
 
 /**
  * The three public addresses are Google Groups, not per-person aliases, so
- * membership can change without the published address changing.
+ * membership can change without the published address changing. They are
+ * defined in `shared/forms.ts`, which the API imports too, and re-exported
+ * here so page code has one place to look.
  */
-export const EMAIL_CONTACT = "contact@kerniva.app";
-export const EMAIL_SALES = "sales@kerniva.app";
-export const EMAIL_SUPPORT = "support@kerniva.app";
-export const EMAIL_SECURITY = "security@kerniva.app";
-export const EMAIL_RESEARCH = "research@kerniva.app";
+export { EMAIL_CONTACT, EMAIL_SALES, EMAIL_SECURITY, EMAIL_SUPPORT } from "../shared/forms";
 
 export const BTN_BOOK_DEMO = "Book a demo";
 export const BTN_JOIN_WAITLIST = "Join the waitlist";
@@ -263,7 +262,7 @@ export const SECURITY_LEDE =
   "Kerniva is designed so that the safe path is the only path: secrets never reach clients, agents never write canonical state, and the model only sees what the person asking is allowed to see.";
 
 export const SECURITY_COMPLIANCE_BODY =
-  "SOC 2 program in progress. We complete SIG and CAIQ questionnaires and provide architecture walkthroughs for enterprise security reviews.";
+  "We complete SIG and CAIQ questionnaires and provide architecture walkthroughs for enterprise security reviews.";
 
 /**
  * The landing cards and the `/security` table say the same things, but two
@@ -503,7 +502,7 @@ export const SOLUTIONS = [
       "Privileged tier enforced at retrieval, not by prompt instruction",
       "Tamper-evident audit trail with SIEM export",
       "Consent-to-redaction on every handoff between colleagues",
-      "Security questionnaire (SIG / CAIQ) and SOC 2 evidence on request",
+      "Security questionnaire (SIG / CAIQ) responses on request",
     ],
   },
   {
@@ -693,20 +692,20 @@ export const CONTACT_PAGE = {
   interest: "I am interested in",
   message: "Message",
   submit: "Send",
+  submitting: "Sending…",
   directTitle: "Direct lines",
   salesLabel: "Sales and partnerships:",
   supportLabel: "Support:",
   securityLabel: "Security reviews:",
-  researchLabel: "Research programs:",
 } as const;
 
 /** `value` is submitted with the form; changing a label must not change it. */
-export const CONTACT_INTERESTS = [
+export const CONTACT_INTERESTS: readonly { value: ContactInterest; label: string }[] = [
   { value: "enterprise", label: "Enterprise workspace" },
   { value: "research", label: "Research & thesis" },
   { value: "security", label: "Security review" },
   { value: "other", label: "Something else" },
-] as const;
+];
 
 /* ------------------------------------------------------------ waitlist --- */
 
@@ -732,15 +731,16 @@ export const WAITLIST_FORM = {
   org: "Organization",
   work: "What kind of work does your team do?",
   note: "One email when access opens. No newsletter, no sharing.",
+  submitting: "Joining…",
 } as const;
 
 /** `value` is submitted with the form; changing a label must not change it. */
-export const WAITLIST_WORK_KINDS = [
+export const WAITLIST_WORK_KINDS: readonly { value: WaitlistWork; label: string }[] = [
   { value: "consulting", label: "Consulting and advisory" },
   { value: "research", label: "Research" },
   { value: "product", label: "Product and project work" },
   { value: "other", label: "Other" },
-] as const;
+];
 
 /* ---------------------------------------------------------------- demo --- */
 
@@ -769,6 +769,7 @@ export const DEMO_PAGE = {
   notesOptional: "(optional)",
   notesPlaceholder: "e.g. handoffs between our research and design teams",
   submit: "Book my demo",
+  submitting: "Sending…",
   finePrint:
     "We reply within one business day with a calendar link. No mailing list, no follow-up sequence.",
   slots: "Live slots this week · Tue to Fri, 9:00 to 17:00 CET",
@@ -793,7 +794,7 @@ export const DEMO_PROMISES = [
 ] as const;
 
 /** Each entry is both the radio's submitted value and its visible label. */
-export const DEMO_TEAM_SIZES = ["1–10", "11–50", "51–200", "200+"] as const;
+export const DEMO_TEAM_SIZES: readonly DemoTeamSize[] = ["1–10", "11–50", "51–200", "200+"];
 
 /* --------------------------------------------------------- video modal --- */
 

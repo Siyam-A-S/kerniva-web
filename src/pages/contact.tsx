@@ -1,23 +1,21 @@
-import { useState, type FormEvent } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { PageHeader } from "../components/page-header";
 import { EASE } from "../components/transitions";
 import {
   CONTACT_INTERESTS,
   CONTACT_PAGE,
-  EMAIL_RESEARCH,
   EMAIL_SALES,
   EMAIL_SECURITY,
   EMAIL_SUPPORT,
 } from "../content";
+import { useFormSubmit } from "../forms/submit";
+import { Honeypot } from "../forms/honeypot";
+
+const FIELDS = ["name", "email", "org", "interest", "message"] as const;
 
 export function ContactPage() {
-  const [sent, setSent] = useState(false);
-  function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    // TODO: POST to the contact endpoint (API Gateway + Lambda → SES) once provisioned.
-    setSent(true);
-  }
+  const { state, onSubmit } = useFormSubmit("contact", FIELDS);
+  const sending = state.status === "sending";
   return (
     <>
       <PageHeader
@@ -29,9 +27,9 @@ export function ContactPage() {
         <div className="container split" style={{ alignItems: "start" }}>
           {/* `layout` on the form so the card resizes with its contents rather
               than snapping when the fields give way to the notice. */}
-          <motion.form layout className="card" onSubmit={submit}>
+          <motion.form layout className="card" onSubmit={onSubmit}>
             <AnimatePresence mode="wait" initial={false}>
-              {sent ? (
+              {state.status === "sent" ? (
                 <motion.div
                   layout
                   key="sent"
@@ -78,9 +76,15 @@ export function ContactPage() {
                     {CONTACT_PAGE.message}
                     <textarea name="message" rows={5} />
                   </label>
-                  <button className="btn btn--primary" type="submit">
-                    {CONTACT_PAGE.submit}
+                  <Honeypot />
+                  <button className="btn btn--primary" type="submit" disabled={sending}>
+                    {sending ? CONTACT_PAGE.submitting : CONTACT_PAGE.submit}
                   </button>
+                  {state.status === "error" ? (
+                    <div className="notice notice--error" role="alert">
+                      {state.message}
+                    </div>
+                  ) : null}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -100,10 +104,6 @@ export function ContactPage() {
               <li>
                 {CONTACT_PAGE.securityLabel}{" "}
                 <a href={`mailto:${EMAIL_SECURITY}`}>{EMAIL_SECURITY}</a>
-              </li>
-              <li>
-                {CONTACT_PAGE.researchLabel}{" "}
-                <a href={`mailto:${EMAIL_RESEARCH}`}>{EMAIL_RESEARCH}</a>
               </li>
             </ul>
           </div>

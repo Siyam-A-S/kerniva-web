@@ -1608,6 +1608,14 @@ table.compare th {
   font-size: 14.5px;
 }
 
+/* A failed send has to read as a failure, not as a quieter confirmation, so
+   this drops the accent ramp for a plain warning ink on the ground colour. */
+.notice--error {
+  border-color: #8a1c1c;
+  background: #fdf3f3;
+  color: #7a1818;
+}
+
 /* =====================================================================
    Parked simulation (src/demo/, not routed). Left on its own local tokens
    so it keeps rendering if /demo-style previews are restored.
