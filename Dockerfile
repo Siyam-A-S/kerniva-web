@@ -29,6 +29,6 @@ COPY --from=api /build/api/dist /srv/api/dist
 COPY --from=api /build/api/node_modules /srv/api/node_modules
 COPY docker-entrypoint.sh /usr/local/bin/kerniva-entrypoint
 RUN chmod +x /usr/local/bin/kerniva-entrypoint
-ENV NODE_ENV=production PORT=8080
+ENV NODE_ENV=production FORMS_API_PORT=8080
 EXPOSE 80
 CMD ["/usr/local/bin/kerniva-entrypoint"]

@@ -12,7 +12,14 @@ import {
 import { initMail, isDryRun, sendSubmission } from "./mail.js";
 import { validate } from "./validate.js";
 
-const PORT = Number(process.env.PORT ?? 8080);
+/**
+ * Deliberately not `PORT`: hosting platforms inject that to tell an app which
+ * port to serve on, and Coolify sets it to the container's exposed port. This
+ * process is behind nginx on loopback, so inheriting that would make it fight
+ * nginx for :80 and die with EADDRINUSE on every restart. nginx proxies to
+ * 8080, so the two have to agree; change both or neither.
+ */
+const PORT = Number(process.env.FORMS_API_PORT ?? 8080);
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "https://kerniva.app";
 
 /**
@@ -170,6 +177,19 @@ const server = createServer((req, res) => {
 
 const prune = setInterval(() => pruneRateLimits(), 600_000);
 prune.unref();
+
+server.on("error", (err: NodeJS.ErrnoException) => {
+  // Without this the only clue is a bare stack trace in the container log.
+  if (err.code === "EADDRINUSE") {
+    console.error(
+      `forms api cannot bind 127.0.0.1:${PORT}: already in use. ` +
+        "Set FORMS_API_PORT to a free port and match it in nginx.conf.",
+    );
+  } else {
+    console.error(`forms api failed to listen on 127.0.0.1:${PORT}:`, err.message);
+  }
+  process.exitCode = 1;
+});
 
 server.listen(PORT, "127.0.0.1", () => {
   console.log(`forms api on 127.0.0.1:${PORT}${isDryRun() ? " (dry run)" : ""}`);

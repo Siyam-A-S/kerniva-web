@@ -56,12 +56,21 @@ a second origin would mean editing the CSP in two files and enabling CORS.
   the damage if the rest fail. Cloudflare Turnstile is the documented next step
   and would need `challenges.cloudflare.com` in the CSP in **both**
   `nginx.conf` and `infra/opentofu/main.tf`.
-- Configuration is environment only; see `api/.env.example`. **In production a
-  missing `SMTP_HOST` makes the API refuse to start**, because the alternative
-  is silently discarding leads. Without it in development it runs in dry-run
-  mode and logs what it would have sent.
+- Configuration is environment only; see `api/.env.example`. With no
+  `SMTP_HOST` in production the API still starts, logs loudly, reports
+  `mailConfigured:false` on `/api/health`, and refuses submissions with a 503
+  naming `contact@kerniva.app`. It must never exit over configuration: it
+  shares a container with the nginx serving the site, and an earlier version
+  that called `process.exit(1)` here crash-looped the container until Coolify
+  hit its restart limit, 404ing the whole site. Only nginx exiting ends the
+  container; `docker-entrypoint.sh` restarts the API on its own.
 - `FORM_TOKEN_SECRET` should be set explicitly. If it is not, the API generates
   one at boot and every in-flight form token breaks on restart.
+- The API binds `FORMS_API_PORT` (default 8080), **not** `PORT`. Hosting
+  platforms inject `PORT` to mean "the port to serve on"; Coolify sets it to
+  the container's exposed port, which made this process fight nginx for `:80`
+  and die with `EADDRINUSE` on every restart, so `/api` served 502 while the
+  site was fine. The value must match the `proxy_pass` in `nginx.conf`.
 - `pnpm dev` proxies `/api` to `127.0.0.1:8080` (`KERNIVA_API_PORT` overrides),
   so run `cd api && pnpm build && pnpm start` alongside it to exercise a form.
 
