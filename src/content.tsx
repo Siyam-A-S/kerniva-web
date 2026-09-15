@@ -76,8 +76,8 @@ export const CTA_SECURITY = {
 
 export const HOME_HERO = {
   /** Two lines, because each is animated separately. */
-  line1: "The AI workspace for teams",
-  line2: "with no time to lose",
+  line1: "Multiplayer AI workspace for teams",
+  line2: "to create complex deliverables",
   lede: "Kerniva connects your team’s research, files, AI sessions, and project decisions in real time, so the next collaborator can continue without reconstructing context.",
   primary: "Join the design-partner program",
   secondary: "See how it works",
