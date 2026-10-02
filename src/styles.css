@@ -7,7 +7,7 @@
  * hairlines, "+" registration crosses, Barlow Condensed over Barlow.
  *
  * Nothing in this file loads a third-party script or image, so the strict CSP
- * in nginx.conf and infra/opentofu/main.tf stays untouched.
+ * in nginx.conf stays untouched.
  */
 :root {
   --color-bg: #f2f2f3;

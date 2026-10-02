@@ -1,224 +1,321 @@
 terraform {
-  required_version = ">= 1.10.0"
+  required_version = ">= 1.6.0"
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 6.0"
-    }
+    azurerm = { source = "hashicorp/azurerm", version = "~> 4.0" }
   }
-  backend "s3" {}
+  # Partial backend: `tofu init -backend-config=backend.hcl`. The values stay out
+  # of the repository; the example keeps the shape reviewable.
+  backend "azurerm" {}
 }
 
-provider "aws" {
-  region = var.region
-}
-
-# CloudFront requires ACM certificates in us-east-1 regardless of the site's region.
-provider "aws" {
-  alias  = "us_east_1"
-  region = "us-east-1"
+provider "azurerm" {
+  # Both set explicitly, with no defaults, so an apply can never land in
+  # whichever subscription happens to be the CLI default. The login that runs
+  # this can see a second subscription in another tenant.
+  subscription_id = var.subscription_id
+  tenant_id       = var.tenant_id
+  features {}
 }
 
 locals {
-  name    = "kerniva-web-${var.environment}"
-  aliases = var.environment == "production" ? [var.domain, "www.${var.domain}"] : ["${var.environment}.${var.domain}"]
+  tags = {
+    Product   = "Kerniva"
+    Component = "site"
+    ManagedBy = "opentofu"
+  }
+
+  # The app is created only once an image exists to run: a Container App cannot
+  # be created pointing at a tag the registry does not hold. First apply builds
+  # everything else, the pipeline pushes an image, the second apply names it.
+  deploy_app = var.image != ""
+
+  # Mail settings are passed only when there is a password. Without one the
+  # API starts in dry run and refuses submissions with a message naming
+  # contact@kerniva.app, which is the behaviour we want from a half-configured
+  # deploy, instead of a transport that fails every send.
+  mail_enabled = var.smtp_pass != ""
 }
 
-data "aws_route53_zone" "site" {
-  name = var.domain
+# Everything the marketing site needs lives in its own resource group, apart
+# from the product demo in rg-kerniva-demo. Same subscription and tenant, but a
+# demo rebuild cannot take the site down with it, the site's logs do not spend
+# the demo's daily log cap, and this repository's pipeline holds no rights over
+# the product's registry.
+resource "azurerm_resource_group" "site" {
+  name     = var.resource_group_name
+  location = var.location
+  tags     = local.tags
 }
 
-# ---------- Static site bucket (private; CloudFront reads via OAC) ----------
+# ---- logs ---------------------------------------------------------------------------------------
 
-resource "aws_s3_bucket" "site" {
-  bucket = local.name
+resource "azurerm_log_analytics_workspace" "site" {
+  name                = "log-${var.name_prefix}"
+  location            = azurerm_resource_group.site.location
+  resource_group_name = azurerm_resource_group.site.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+  # A marketing site should never log much. The cap is what stops a crawler
+  # storm, which nginx logs line by line, from becoming an ingestion bill.
+  daily_quota_gb = 0.1
+  tags           = local.tags
 }
 
-resource "aws_s3_bucket_public_access_block" "site" {
-  bucket                  = aws_s3_bucket.site.id
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
+# ---- container apps environment -----------------------------------------------------------------
+
+resource "azurerm_container_app_environment" "site" {
+  name                = "cae-${var.name_prefix}"
+  location            = azurerm_resource_group.site.location
+  resource_group_name = azurerm_resource_group.site.name
+
+  # Routed through Azure Monitor with the diagnostic setting below, not wired
+  # straight to the workspace: the direct destination ignores the daily cap.
+  logs_destination = "azure-monitor"
+
+  tags = local.tags
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "site" {
-  bucket = aws_s3_bucket.site.id
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
+resource "azurerm_monitor_diagnostic_setting" "environment" {
+  name                       = "to-log-analytics"
+  target_resource_id         = azurerm_container_app_environment.site.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.site.id
+
+  enabled_log {
+    category = "ContainerAppConsoleLogs"
+  }
+  enabled_log {
+    category = "ContainerAppSystemLogs"
   }
 }
 
-resource "aws_s3_bucket_policy" "site" {
-  bucket = aws_s3_bucket.site.id
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Sid       = "AllowCloudFrontRead"
-      Effect    = "Allow"
-      Principal = { Service = "cloudfront.amazonaws.com" }
-      Action    = "s3:GetObject"
-      Resource  = "${aws_s3_bucket.site.arn}/*"
-      Condition = {
-        StringEquals = { "AWS:SourceArn" = aws_cloudfront_distribution.site.arn }
-      }
-    }]
-  })
+# ---- registry -----------------------------------------------------------------------------------
+
+resource "azurerm_container_registry" "site" {
+  name                = var.registry_name
+  location            = azurerm_resource_group.site.location
+  resource_group_name = azurerm_resource_group.site.name
+  sku                 = "Basic"
+  # No admin user: the app pulls with its managed identity and the pipeline
+  # pushes with a federated credential, so there is no registry password.
+  admin_enabled = false
+  tags          = local.tags
 }
 
-# ---------- Certificate ----------
+# ---- identities and roles -----------------------------------------------------------------------
 
-resource "aws_acm_certificate" "site" {
-  provider                  = aws.us_east_1
-  domain_name               = local.aliases[0]
-  subject_alternative_names = slice(local.aliases, 1, length(local.aliases))
-  validation_method         = "DNS"
+resource "azurerm_user_assigned_identity" "site" {
+  name                = "id-${var.name_prefix}"
+  location            = azurerm_resource_group.site.location
+  resource_group_name = azurerm_resource_group.site.name
+  tags                = local.tags
+}
+
+resource "azurerm_role_assignment" "site_pull" {
+  scope                = azurerm_container_registry.site.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_user_assigned_identity.site.principal_id
+}
+
+# The GitHub pipeline's service principal (Entra app gha-kerniva-site-deploy,
+# created by hand: app registrations are tenant objects, not resources). It may
+# push to this registry and roll this app, and nothing else in the
+# subscription. Skipped until the principal exists.
+resource "azurerm_role_assignment" "deploy_push" {
+  count                = var.deploy_principal_id != "" ? 1 : 0
+  scope                = azurerm_container_registry.site.id
+  role_definition_name = "AcrPush"
+  principal_id         = var.deploy_principal_id
+  principal_type       = "ServicePrincipal"
+}
+
+resource "azurerm_role_assignment" "deploy_apps" {
+  count                = var.deploy_principal_id != "" ? 1 : 0
+  scope                = azurerm_resource_group.site.id
+  role_definition_name = "Container Apps Contributor"
+  principal_id         = var.deploy_principal_id
+  principal_type       = "ServicePrincipal"
+}
+
+# Updating an app re-submits its identity block, and Azure checks that the
+# caller may assign that identity. Without this the image update is refused
+# with LinkedAuthorizationFailed.
+resource "azurerm_role_assignment" "deploy_identity" {
+  count                = var.deploy_principal_id != "" ? 1 : 0
+  scope                = azurerm_user_assigned_identity.site.id
+  role_definition_name = "Managed Identity Operator"
+  principal_id         = var.deploy_principal_id
+  principal_type       = "ServicePrincipal"
+}
+
+# ---- the site -----------------------------------------------------------------------------------
+
+resource "azurerm_container_app" "site" {
+  count = local.deploy_app ? 1 : 0
+
+  name                         = "ca-${var.name_prefix}"
+  resource_group_name          = azurerm_resource_group.site.name
+  container_app_environment_id = azurerm_container_app_environment.site.id
+  revision_mode                = "Single"
+  tags                         = local.tags
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.site.id]
+  }
+
+  registry {
+    server   = azurerm_container_registry.site.login_server
+    identity = azurerm_user_assigned_identity.site.id
+  }
+
+  secret {
+    name  = "form-token-secret"
+    value = var.form_token_secret
+  }
+
+  dynamic "secret" {
+    for_each = local.mail_enabled ? [1] : []
+    content {
+      name  = "smtp-pass"
+      value = var.smtp_pass
+    }
+  }
+
+  ingress {
+    external_enabled = true
+    # nginx listens on 80 inside the container; the platform terminates TLS.
+    target_port = 80
+    # Plain HTTP is refused at the platform. nginx's own bounce reads
+    # Cloudflare's CF-Visitor header and keeps working behind this.
+    allow_insecure_connections = false
+    transport                  = "auto"
+
+    traffic_weight {
+      latest_revision = true
+      percentage      = 100
+    }
+
+    # Empty until cutover, so the default hostname can be smoke-tested. After
+    # cutover this holds Cloudflare's published IPv4 ranges, which is what
+    # makes the CF-Connecting-IP header nginx rate-limits on trustworthy: a
+    # caller that bypasses Cloudflare could set it to anything.
+    dynamic "ip_security_restriction" {
+      for_each = var.ingress_allowed_cidrs
+      content {
+        name             = "cloudflare-${ip_security_restriction.key}"
+        action           = "Allow"
+        ip_address_range = ip_security_restriction.value
+      }
+    }
+  }
+
+  template {
+    # Exactly one replica, always on. The forms API keeps its rate-limit
+    # windows, its daily send cap and its spent form tokens in memory: a
+    # second replica would double every limit and refuse tokens the first one
+    # issued, and scaling to zero would reset the cap on every cold start.
+    min_replicas = 1
+    max_replicas = 1
+
+    container {
+      name   = "site"
+      image  = var.image
+      cpu    = 0.25
+      memory = "0.5Gi"
+
+      env {
+        name  = "ALLOWED_ORIGIN"
+        value = var.allowed_origin
+      }
+      env {
+        name        = "FORM_TOKEN_SECRET"
+        secret_name = "form-token-secret"
+      }
+      env {
+        name  = "MAIL_FROM"
+        value = var.mail_from
+      }
+      env {
+        name  = "CONFIRMATION_ENABLED"
+        value = var.confirmation_enabled ? "true" : "false"
+      }
+
+      dynamic "env" {
+        for_each = local.mail_enabled ? {
+          SMTP_HOST = var.smtp_host
+          SMTP_PORT = tostring(var.smtp_port)
+          SMTP_USER = var.smtp_user
+        } : {}
+        content {
+          name  = env.key
+          value = env.value
+        }
+      }
+
+      dynamic "env" {
+        for_each = local.mail_enabled ? [1] : []
+        content {
+          name        = "SMTP_PASS"
+          secret_name = "smtp-pass"
+        }
+      }
+
+      # All three probes ask nginx, never /api/health. The forms API restarts
+      # on its own inside the container; a probe that depended on it would
+      # have the platform kill the site whenever mail is misconfigured.
+      startup_probe {
+        transport               = "HTTP"
+        port                    = 80
+        path                    = "/healthz"
+        interval_seconds        = 2
+        failure_count_threshold = 30
+      }
+      liveness_probe {
+        transport               = "HTTP"
+        port                    = 80
+        path                    = "/healthz"
+        interval_seconds        = 30
+        failure_count_threshold = 3
+      }
+      readiness_probe {
+        transport               = "HTTP"
+        port                    = 80
+        path                    = "/healthz"
+        interval_seconds        = 10
+        failure_count_threshold = 3
+      }
+    }
+  }
+
   lifecycle {
-    create_before_destroy = true
+    # The pipeline owns the image tag: every push to main rolls a new
+    # sha-tagged revision with `az containerapp update`. Without this the next
+    # apply would roll the site back to whatever tag was last written here.
+    ignore_changes = [template[0].container[0].image]
   }
+
+  depends_on = [azurerm_role_assignment.site_pull]
 }
 
-resource "aws_route53_record" "cert_validation" {
-  for_each = {
-    for dvo in aws_acm_certificate.site.domain_validation_options : dvo.domain_name => {
-      name   = dvo.resource_record_name
-      record = dvo.resource_record_value
-      type   = dvo.resource_record_type
-    }
-  }
-  zone_id         = data.aws_route53_zone.site.zone_id
-  name            = each.value.name
-  type            = each.value.type
-  records         = [each.value.record]
-  ttl             = 60
-  allow_overwrite = true
+# ---- custom domain ------------------------------------------------------------------------------
+
+# The certificate is a Cloudflare Origin CA certificate, uploaded to the
+# environment with `az containerapp env certificate upload` so its private key
+# never enters state. It is used instead of an Azure managed certificate
+# because Cloudflare stays in front of the site: a managed certificate has to
+# reach the app directly to validate and to renew, and a proxied record
+# prevents that.
+data "azurerm_container_app_environment_certificate" "origin" {
+  count                        = var.origin_certificate_name != "" ? 1 : 0
+  name                         = var.origin_certificate_name
+  container_app_environment_id = azurerm_container_app_environment.site.id
 }
 
-resource "aws_acm_certificate_validation" "site" {
-  provider                = aws.us_east_1
-  certificate_arn         = aws_acm_certificate.site.arn
-  validation_record_fqdns = [for r in aws_route53_record.cert_validation : r.fqdn]
-}
+resource "azurerm_container_app_custom_domain" "site" {
+  for_each = local.deploy_app && var.origin_certificate_name != "" ? toset(var.hostnames) : toset([])
 
-# ---------- CloudFront ----------
-
-resource "aws_cloudfront_origin_access_control" "site" {
-  name                              = local.name
-  origin_access_control_origin_type = "s3"
-  signing_behavior                  = "always"
-  signing_protocol                  = "sigv4"
-}
-
-# Single-page app: every non-asset path serves index.html and React Router
-# resolves the route client-side.
-resource "aws_cloudfront_function" "spa_rewrite" {
-  name    = "${local.name}-spa-rewrite"
-  runtime = "cloudfront-js-2.0"
-  publish = true
-  code    = <<-JS
-    function handler(event) {
-      var req = event.request;
-      var host = req.headers.host && req.headers.host.value;
-      if (host && host.indexOf("www.") === 0) {
-        return { statusCode: 301, statusDescription: "Moved Permanently",
-          headers: { location: { value: "https://" + host.slice(4) + req.uri } } };
-      }
-      if (!req.uri.includes(".")) { req.uri = "/index.html"; }
-      return req;
-    }
-  JS
-}
-
-resource "aws_cloudfront_response_headers_policy" "security" {
-  name = "${local.name}-security-headers"
-  security_headers_config {
-    strict_transport_security {
-      access_control_max_age_sec = 63072000
-      include_subdomains         = true
-      preload                    = true
-      override                   = true
-    }
-    content_type_options { override = true }
-    frame_options {
-      frame_option = "DENY"
-      override     = true
-    }
-    referrer_policy {
-      referrer_policy = "strict-origin-when-cross-origin"
-      override        = true
-    }
-    content_security_policy {
-      content_security_policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
-      override                = true
-    }
-  }
-}
-
-resource "aws_cloudfront_distribution" "site" {
-  enabled             = true
-  is_ipv6_enabled     = true
-  comment             = local.name
-  default_root_object = "index.html"
-  aliases             = local.aliases
-  price_class         = "PriceClass_100"
-  http_version        = "http2and3"
-
-  origin {
-    domain_name              = aws_s3_bucket.site.bucket_regional_domain_name
-    origin_id                = "s3-site"
-    origin_access_control_id = aws_cloudfront_origin_access_control.site.id
-  }
-
-  default_cache_behavior {
-    target_origin_id           = "s3-site"
-    viewer_protocol_policy     = "redirect-to-https"
-    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
-    cached_methods             = ["GET", "HEAD"]
-    compress                   = true
-    cache_policy_id            = "658327ea-f89d-4fab-a63d-7e88639e58f6" # Managed-CachingOptimized
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
-
-    function_association {
-      event_type   = "viewer-request"
-      function_arn = aws_cloudfront_function.spa_rewrite.arn
-    }
-  }
-
-  restrictions {
-    geo_restriction { restriction_type = "none" }
-  }
-
-  viewer_certificate {
-    acm_certificate_arn      = aws_acm_certificate_validation.site.certificate_arn
-    ssl_support_method       = "sni-only"
-    minimum_protocol_version = "TLSv1.2_2021"
-  }
-}
-
-# ---------- DNS ----------
-
-resource "aws_route53_record" "alias" {
-  for_each = toset(local.aliases)
-  zone_id  = data.aws_route53_zone.site.zone_id
-  name     = each.value
-  type     = "A"
-  alias {
-    name                   = aws_cloudfront_distribution.site.domain_name
-    zone_id                = aws_cloudfront_distribution.site.hosted_zone_id
-    evaluate_target_health = false
-  }
-}
-
-resource "aws_route53_record" "alias_v6" {
-  for_each = toset(local.aliases)
-  zone_id  = data.aws_route53_zone.site.zone_id
-  name     = each.value
-  type     = "AAAA"
-  alias {
-    name                   = aws_cloudfront_distribution.site.domain_name
-    zone_id                = aws_cloudfront_distribution.site.hosted_zone_id
-    evaluate_target_health = false
-  }
+  name                                     = each.value
+  container_app_id                         = azurerm_container_app.site[0].id
+  container_app_environment_certificate_id = data.azurerm_container_app_environment_certificate.origin[0].id
+  certificate_binding_type                 = "SniEnabled"
 }

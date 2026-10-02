@@ -1,0 +1,100 @@
+name: Deploy site
+
+# Builds the kerniva.app image (nginx serving the site, plus the forms API),
+# pushes it to the site's own Azure registry, and rolls the Container App to
+# it.
+#
+# Gated on CI, not on a copy of it. `workflow_run` is what makes that possible
+# across workflows: a `needs:` cannot reach into another workflow's jobs, and
+# repeating the checks here would let the two copies drift. If CI did not
+# conclude successfully, nothing ships.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  # Manual escape hatch for redeploying an unchanged commit. It still builds
+  # from the ref, so it cannot publish anything CI has not seen.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # Federated credential, not a stored secret: nothing here or in Azure holds
+  # a long-lived password for the registry or the subscription.
+  id-token: write
+
+# One deploy at a time, and never cancel one halfway through a rollout.
+concurrency:
+  group: deploy-site
+  cancel-in-progress: false
+
+env:
+  RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP || 'rg-kerniva-site' }}
+  REGISTRY_NAME: ${{ vars.AZURE_ACR_NAME || 'acrkernivasite' }}
+  APP: ${{ vars.AZURE_CONTAINER_APP || 'ca-kerniva-site' }}
+  IMAGE: ${{ vars.AZURE_ACR_NAME || 'acrkernivasite' }}.azurecr.io/kerniva-site
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    # The federated credential trusts this environment and nothing else, and
+    # the environment only admits `main`. A branch or a fork cannot mint the
+    # token, whatever its workflow file says.
+    environment: site
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Resolve the commit being deployed
+        id: sha
+        run: echo "sha=${{ github.event.workflow_run.head_sha || github.sha }}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      # These three are identifiers, not credentials. They are environment
+      # secrets only so they stay out of logs.
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # Exchanges the federated token for a registry token. The registry has
+      # admin credentials disabled, so there is no password to leak.
+      - run: az acr login --name "$REGISTRY_NAME"
+
+      # Tagged by commit, never `latest`: a deploy names an exact image, so a
+      # rollback is a real coordinate rather than whatever `latest` meant.
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE }}:sha-${{ steps.sha.outputs.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # The first apply of infra/opentofu runs before any image exists and so
+      # creates no app. Until the second apply names an image, pushing is all
+      # there is to do.
+      - name: Roll the app
+        run: |
+          set -euo pipefail
+          if ! az containerapp show --name "$APP" --resource-group "$RESOURCE_GROUP" --output none 2>/dev/null; then
+            echo "::notice::$APP does not exist yet. Image pushed; create the app with infra/opentofu using image=${IMAGE}:sha-${{ steps.sha.outputs.sha }}"
+            exit 0
+          fi
+          az containerapp update \
+            --name "$APP" --resource-group "$RESOURCE_GROUP" \
+            --image "${IMAGE}:sha-${{ steps.sha.outputs.sha }}" \
+            --output none
+
+      # Prints the coordinate a rollback needs, so it is in the log before it
+      # is wanted: `az containerapp revision activate` on the previous one.
+      - name: Report revisions
+        run: |
+          az containerapp revision list --name "$APP" --resource-group "$RESOURCE_GROUP" \
+            --query "reverse(sort_by([].{revision:name,active:properties.active,healthy:properties.healthState,created:properties.createdTime}, &created))[:3]" \
+            --output table || true

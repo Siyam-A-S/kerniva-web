@@ -23,7 +23,9 @@ stop() {
   kill -TERM "$nginx_pid" 2>/dev/null || true
   kill -TERM "$api_pid" 2>/dev/null || true
 }
-trap stop TERM INT
+# QUIT as well: the nginx base image declares it as the stop signal, so that is
+# what the host sends. Unhandled, every rollout waited out the kill timeout.
+trap stop TERM INT QUIT
 
 wait "$nginx_pid"
 status=$?

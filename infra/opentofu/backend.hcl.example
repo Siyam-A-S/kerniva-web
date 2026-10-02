@@ -1,0 +1,16 @@
+# tofu init -backend-config=backend.hcl
+#
+# The state holds the SMTP app password and the form token secret in clear
+# text, so the container it lives in must not be public and should have
+# versioning on. Create it with `az` before the first init (see README.md): a
+# backend cannot bootstrap the storage that holds it.
+#
+# subscription_id is here as well as on the provider. The backend is
+# configured before any variable is read, so without it the state would be
+# looked for in whichever subscription the CLI defaults to.
+subscription_id      = "<the Kerniva subscription id>"
+resource_group_name  = "rg-kerniva-tfstate"
+storage_account_name = "stkernivatfstate"
+container_name       = "tfstate"
+key                  = "site.tfstate"
+use_azuread_auth     = true

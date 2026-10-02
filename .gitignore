@@ -8,6 +8,12 @@ dist
 .terraform/
 .terraform.lock.hcl
 terraform.tfstate*
+# Per-machine backend settings, variable files, and certificate material.
+backend.hcl
+*.tfvars
+*.pem
+*.pfx
+*.key
 tsconfig.tsbuildinfo
 
 # Video masters: kept locally, never shipped or committed (see CLAUDE.md).
@@ -16,3 +22,4 @@ media-src/
 # Local agent tooling, not project files.
 .agents/
 skills-lock.json
+graphify-out/

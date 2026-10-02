@@ -1,5 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { checkToken, issueToken, pruneRateLimits, rateLimited } from "./guard.js";
+import {
+  capFrom,
+  checkToken,
+  claimConfirmation,
+  claimToken,
+  dailyCounter,
+  issueToken,
+  pruneRateLimits,
+  rateLimited,
+  releaseToken,
+  sentTodayCount,
+} from "./guard.js";
 
 describe("form token", () => {
   it("rejects a submission with no token", () => {
@@ -78,6 +89,94 @@ describe("hourly ceiling", () => {
       }
     }
     expect(blocked).toBeGreaterThan(0);
+  });
+});
+
+describe("single-use token", () => {
+  it("can be claimed once", () => {
+    const t = issueToken(Date.now() - 10_000);
+    expect(claimToken(t)).toBe(true);
+    expect(claimToken(t)).toBe(false);
+  });
+
+  it("can be claimed again after it is released", () => {
+    const t = issueToken(Date.now() - 11_000);
+    expect(claimToken(t)).toBe(true);
+    releaseToken(t);
+    expect(claimToken(t)).toBe(true);
+  });
+
+  it("is forgotten once it is too old to pass the age check anyway", () => {
+    const t = issueToken(Date.now() - 12_000);
+    expect(claimToken(t)).toBe(true);
+    pruneRateLimits(t.ts + 3 * 60 * 60 * 1000);
+    expect(claimToken(t)).toBe(true);
+  });
+});
+
+describe("capFrom", () => {
+  it("reads a whole number", () => {
+    expect(capFrom("50", 200)).toBe(50);
+    expect(capFrom("0", 200)).toBe(0);
+  });
+
+  it.each([undefined, "", "  ", "lots", "-5", "1.5", "NaN"])(
+    "keeps the default rather than lifting the cap for %j",
+    (raw) => {
+      expect(capFrom(raw, 200)).toBe(200);
+    },
+  );
+});
+
+describe("dailyCounter", () => {
+  const DAY = 86_400_000;
+  const noon = Math.floor(Date.now() / DAY) * DAY + DAY / 2;
+
+  it("fills at its limit", () => {
+    const c = dailyCounter(2);
+    expect(c.full(noon)).toBe(false);
+    c.add(noon);
+    expect(c.full(noon)).toBe(false);
+    c.add(noon);
+    expect(c.full(noon)).toBe(true);
+    expect(c.count(noon)).toBe(2);
+  });
+
+  it("starts again on the next UTC day", () => {
+    const c = dailyCounter(1);
+    c.add(noon);
+    expect(c.full(noon)).toBe(true);
+    expect(c.full(noon + DAY)).toBe(false);
+    expect(c.count(noon + DAY)).toBe(0);
+  });
+
+  it("is always full at a limit of zero", () => {
+    expect(dailyCounter(0).full(noon)).toBe(true);
+  });
+});
+
+describe("confirmation claim", () => {
+  const DAY = 86_400_000;
+
+  it("allows one acknowledgement per address per day", () => {
+    const now = Date.now();
+    expect(claimConfirmation("once@example.com", now)).toBe(true);
+    expect(claimConfirmation("once@example.com", now + 1_000)).toBe(false);
+    expect(claimConfirmation("once@example.com", now + DAY - 1)).toBe(false);
+  });
+
+  it("treats case and padding as the same address", () => {
+    const now = Date.now();
+    expect(claimConfirmation("Mixed@Example.com", now)).toBe(true);
+    expect(claimConfirmation(" mixed@example.COM ", now)).toBe(false);
+  });
+
+  it("counts against the overall send total", () => {
+    const before = sentTodayCount();
+    expect(claimConfirmation("counted@example.com")).toBe(true);
+    expect(sentTodayCount()).toBe(before + 1);
+    expect(claimConfirmation("counted@example.com")).toBe(false);
+    expect(sentTodayCount()).toBe(before + 1);
   });
 });
 

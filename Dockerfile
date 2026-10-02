@@ -1,7 +1,6 @@
-# kerniva.app static marketing site plus the form intake API (the live
-# simulation is behind a waitlist for now; the /try packaging lives in git
-# history). Both run in one container so Coolify keeps its Dockerfile build
-# pack on port 80, and so the browser only ever talks to one origin.
+# kerniva.app static marketing site plus the form intake API. Both run in one
+# container, nginx on port 80 with the API behind it on loopback, so the
+# browser only ever talks to one origin and the CSP needs no exception.
 FROM node:24-bookworm-slim AS site
 WORKDIR /site
 RUN corepack enable

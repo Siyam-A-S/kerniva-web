@@ -1,0 +1,53 @@
+/**
+ * The acknowledgement a visitor receives after a form is delivered to the
+ * team. Pure data, like `forms.ts`, because the API cannot import the React
+ * module that holds the rest of the site's copy.
+ *
+ * Every word here is fixed. Nothing the visitor typed is ever placed in this
+ * message, not even their name: the address on a form is unverified, so
+ * anything echoed back could be aimed at a stranger's inbox. A fixed note is
+ * useless to someone trying to send their own text through our domain.
+ */
+import type { FormKind } from "./forms.js";
+
+export type Confirmation = { subject: string; body: string };
+
+const SIGN_OFF = [
+  "If you did not fill in a form on kerniva.app, you can ignore this email. Nothing else will be sent.",
+  "",
+  "Kerniva",
+  "https://kerniva.app",
+].join("\n");
+
+export const CONFIRMATIONS: Record<FormKind, Confirmation> = {
+  contact: {
+    subject: "We received your message",
+    body: [
+      "Thank you for getting in touch with Kerniva.",
+      "",
+      "Your message reached the team, and someone will reply to this address.",
+      "",
+      SIGN_OFF,
+    ].join("\n"),
+  },
+  waitlist: {
+    subject: "You are on the Kerniva waitlist",
+    body: [
+      "Thank you for joining the Kerniva waitlist.",
+      "",
+      "We will write to this address when access opens.",
+      "",
+      SIGN_OFF,
+    ].join("\n"),
+  },
+  demo: {
+    subject: "We received your demo request",
+    body: [
+      "Thank you for asking for a Kerniva demo.",
+      "",
+      "Your request reached the team, and someone will reply to this address to arrange a time.",
+      "",
+      SIGN_OFF,
+    ].join("\n"),
+  },
+};

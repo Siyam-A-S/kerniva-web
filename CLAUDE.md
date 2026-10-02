@@ -14,7 +14,8 @@ pnpm test           # vitest; `src/routes.test.tsx` renders every route server-s
 pnpm build          # tsc -b && vite build → dist/
 pnpm format         # prettier (CI runs format:check)
 
-cd api && pnpm build   # tsc -b, compiles the forms API to api/dist
+cd api && pnpm build   # tsc, compiles the forms API to api/dist (tests excluded)
+cd api && pnpm check   # type-checks the API, tests included
 cd api && pnpm test    # the API's own vitest (root `pnpm test` also picks these up)
 ```
 
@@ -53,50 +54,71 @@ a second origin would mean editing the CSP in two files and enabling CORS.
   `application/json` content type (which a cross-site form cannot send without
   a preflight this server refuses), an HMAC-signed form token that must be at
   least three seconds old, a honeypot field, and a daily send cap that bounds
-  the damage if the rest fail. Cloudflare Turnstile is the documented next step
-  and would need `challenges.cloudflare.com` in the CSP in **both**
-  `nginx.conf` and `infra/opentofu/main.tf`.
+  the damage if the rest fail. A token is single use: it is claimed once every
+  other check has passed and handed back if the send fails, so a typo or a mail
+  outage does not cost the visitor a reload. Cloudflare Turnstile is the
+  documented next step and would need `challenges.cloudflare.com` in the CSP in
+  `nginx.conf`.
+- **The acknowledgement to the visitor is fixed copy and nothing else.**
+  `CONFIRMATION_ENABLED=true` sends a short note after a submission is
+  delivered to the team. The address on a form is unverified, so the message
+  must be useless to someone aiming it at a stranger: subject and body come
+  whole from `shared/confirmation.ts`, and nothing the visitor typed is placed
+  in it, not even their name. One per address per day, a daily ceiling of its
+  own below the overall one, sent only after the team mail succeeds, never
+  awaited, and its failure never changes the response. The form's on-screen
+  confirmation must not promise an email, since one may be skipped.
+- The API is split so it can be tested without a mail server: `compose.ts`
+  builds messages and reads SMTP settings (no mail library), `mail.ts` owns the
+  transport, `app.ts` is the request handler with its senders passed in, and
+  `index.ts` only wires them to a port. Keep `nodemailer` out of everything but
+  `mail.ts`: the root `pnpm test` runs the API tests without the API's
+  dependencies installed.
 - Configuration is environment only; see `api/.env.example`. With no
   `SMTP_HOST` in production the API still starts, logs loudly, reports
   `mailConfigured:false` on `/api/health`, and refuses submissions with a 503
   naming `contact@kerniva.app`. It must never exit over configuration: it
   shares a container with the nginx serving the site, and an earlier version
-  that called `process.exit(1)` here crash-looped the container until Coolify
-  hit its restart limit, 404ing the whole site. Only nginx exiting ends the
+  that called `process.exit(1)` here crash-looped the container until the host
+  hit its restart limit, 404ing the whole site. An empty `SMTP_HOST` counts as
+  unset, because infrastructure code passes empty strings for unfilled values. Only nginx exiting ends the
   container; `docker-entrypoint.sh` restarts the API on its own.
 - `FORM_TOKEN_SECRET` should be set explicitly. If it is not, the API generates
   one at boot and every in-flight form token breaks on restart.
 - The API binds `FORMS_API_PORT` (default 8080), **not** `PORT`. Hosting
-  platforms inject `PORT` to mean "the port to serve on"; Coolify sets it to
+  platforms inject `PORT` to mean "the port to serve on"; Coolify set it to
   the container's exposed port, which made this process fight nginx for `:80`
   and die with `EADDRINUSE` on every restart, so `/api` served 502 while the
   site was fine. The value must match the `proxy_pass` in `nginx.conf`.
 - `pnpm dev` proxies `/api` to `127.0.0.1:8080` (`KERNIVA_API_PORT` overrides),
   so run `cd api && pnpm build && pnpm start` alongside it to exercise a form.
 
-## Hosting (current): Coolify + Cloudflare, build-from-source
+## Hosting: Azure Container Apps + Cloudflare (migrating from Coolify)
 
 ```
-Cloudflare (proxied DNS, WAF, rate limits, cache)
-  └─ Coolify/Traefik on one VM
-       └─ application built FROM THIS REPO by Coolify's GitHub App
-            (build pack: Dockerfile · port 80 · domain https://kerniva.app)
+Cloudflare (proxied DNS, WAF, rate limits, cache, Full strict TLS)
+  └─ Azure Container Apps ingress (Cloudflare Origin CA certificate)
+       └─ ca-kerniva-site: this repo's Dockerfile, one replica, port 80
 ```
 
-- Deploys are **build-from-source**: the Coolify GitHub App watches this repo and rebuilds the `Dockerfile` on push to `main`, with no registry in the loop. The GitHub App needs Coolify's dashboard reachable by GitHub (instance domain, e.g. `https://coolify.kerniva.app`) or auto-deploy webhooks won't fire.
-- `Dockerfile`: builds the site and the forms API, then ships `dist/` in `nginx:1.27-alpine` with `nginx.conf` and runs the API alongside it on loopback (`docker-entrypoint.sh` supervises both, and the container exits if either dies). No simulation bundle. Use the Dockerfile build pack (not Static/nixpacks): the nginx config carries the security headers, CSP, and www redirect.
-- `.github/workflows/deploy-coolify.yml`: builds and publishes `ghcr.io/siyam-a-s/kerniva-site` on every push to `main`, then notifies Coolify. It is the escape hatch from the broken GitHub App webhook (see the `coolify.kerniva.app` note below) and needs no DNS, since the runner calls Coolify directly. Dormant until repo variable `COOLIFY_WEBHOOK_URL` + secret `COOLIFY_TOKEN` are set and the Coolify application is switched from the Dockerfile build pack to Docker Image. The monorepo's `../kerniva/infra/coolify/docker-compose.yml` still references that image for when the full simulation stack returns.
-- `nginx.conf`: security headers + CSP declared once via maps (server-level `add_header` is dropped in any location that adds its own — keep it that way), `www` → apex redirect, an https bounce keyed on Cloudflare's `CF-Visitor` header (Traefik/cloudflared always deliver plain HTTP, so `X-Forwarded-Proto` is meaningless here), 404 for dotfiles (with `/.well-known/security.txt` carved out), SPA fallback. `.dockerignore` keeps `.git`/`node_modules`/`infra` out of the build context.
-- `www.kerniva.app` is **not live**: it has no DNS record, so the `www` redirect in `nginx.conf` never gets reached. Serving it needs two manual steps outside this repo: a proxied `www` CNAME to the apex in Cloudflare, and `https://www.kerniva.app` added to the Coolify application's Domains field so Traefik routes that host. Apex stays canonical (`og:url`, `<link rel="canonical">`, `sitemap.xml`); `www` only ever 301s to it. The AWS path in `infra/opentofu/main.tf` already models both (ACM SAN, CloudFront alias, Route 53 record, viewer-request redirect).
+**State of the move:** the Azure code path below is complete in this repo, but until the Cloudflare record for `kerniva.app` is pointed at the Container App, production is still the Coolify VM, which rebuilds the `Dockerfile` from this repo on every push to `main`. A merge to `main` therefore still reaches visitors through Coolify. Delete this paragraph at cutover.
+
+- Everything lives in resource group `rg-kerniva-site`, in the same Azure subscription and tenant as the product demo (`rg-kerniva-demo`, repo `../kerniva-prod`) but sharing nothing with it. `infra/opentofu` is the whole of it: environment, registry, identity, log workspace, the app, and the custom domain binding. Its README is the runbook (bootstrap, two-pass first apply, certificate, cutover, rollback). The login that runs it can see a second subscription in another tenant, so the subscription and tenant are required variables with no default and every `az` command names `--subscription`. Never run `tofu` in `../kerniva-prod` from here: its code does not match what is deployed.
+- **One replica, always on, and it has to stay that way.** The forms API keeps rate-limit windows, the daily send caps and spent form tokens in memory. A second replica doubles every limit and refuses tokens the first one issued; scale to zero resets the caps on each cold start.
+- `.github/workflows/deploy-site.yml` runs after CI succeeds on `main`: builds the image, pushes it to the site's registry tagged `sha-<commit>` (never `latest`), and rolls the app with `az containerapp update`. It signs in through GitHub OIDC as the Entra app `gha-kerniva-site-deploy`, whose federated credential trusts only the `site` environment, so there is no stored Azure secret. OpenTofu ignores the image after creation; the pipeline owns it. (The Entra app named `kerniva-web` is the product's sign-in registration, not this repo.)
+- `Dockerfile`: builds the site and the forms API, then ships `dist/` in `nginx:1.27-alpine` with `nginx.conf` and runs the API alongside it on loopback. `docker-entrypoint.sh` supervises both: the API is restarted when it dies, and only nginx exiting ends the container. No simulation bundle.
+- `nginx.conf`: security headers + CSP declared once via maps (server-level `add_header` is dropped in any location that adds its own, so keep it that way), `www` → apex redirect, an https bounce keyed on Cloudflare's `CF-Visitor` header (the platform ingress always delivers plain HTTP to the container), `/healthz` for the platform's probes, 404 for dotfiles (with `/.well-known/security.txt` carved out), SPA fallback. `.dockerignore` keeps `.git`/`node_modules`/`infra` out of the build context.
+- **Probes ask nginx at `/healthz`, never `/api/health`.** A probe that depended on the forms API would have the platform kill the site whenever mail is misconfigured, which is the exact failure the entrypoint is built to avoid.
+- **Cloudflare stays in front, and nginx depends on it.** Rate limiting keys on `CF-Connecting-IP` and the https bounce on `CF-Visitor`. Those headers are only trustworthy because the Container App's ingress admits Cloudflare's address ranges and nothing else (`ingress_allowed_cidrs`); a caller reaching the origin directly could set them to anything. The origin certificate is a Cloudflare Origin CA certificate uploaded by CLI, not an Azure managed certificate, which cannot validate or renew through a proxied record.
+- `www.kerniva.app` is **not live**: it has no DNS record, so the `www` redirect in `nginx.conf` never gets reached. Apex stays canonical (`og:url`, `<link rel="canonical">`, `sitemap.xml`). If it is ever wanted, a Cloudflare redirect rule on a proxied `www` record is simpler than a second hostname binding.
 - `og:image` must stay a **PNG** (`public/og-image.png`, 1200×630). LinkedIn, Slack, and X all silently drop SVG og:images, which is what made link previews render blank. Regenerate it rather than swapping in an SVG.
-- CSP allows only self, Google Fonts, inline styles, and `data:`/`blob:` images. Adding any external script, image, or fetch target means editing the CSP in **both** `nginx.conf` and `infra/opentofu/main.tf`.
-- Cloudflare configuration (DNS proxied, Full-strict TLS, WAF + Bot Fight Mode, rate-limit rules, cache rules, firewall allowing only Cloudflare IPs to the origin) is documented in `../kerniva/infra/coolify/README.md` §3; it is manual, not in code.
-
-`infra/opentofu` + `.github/workflows/deploy.yml` are the **future AWS path** (S3 + CloudFront + ACM + Route 53). They are kept current but not auto-triggered; `deploy.yml` is manual-only until the migration.
+- CSP allows only self, Google Fonts, inline styles, and `data:`/`blob:` images. It is declared in one place, `nginx.conf`; adding any external script, image, or fetch target means editing it there.
+- HSTS is sent with `includeSubDomains; preload`, so every subdomain of kerniva.app must serve valid HTTPS before anything links to it. That includes `live.kerniva.app`, the product demo.
+- Cloudflare configuration (DNS proxied, Full-strict TLS, WAF + Bot Fight Mode, rate-limit rules, cache rules) is manual, not in code.
 
 ## Sandbox guardrails and budget (for when /try returns)
 
-Enforced server-side in the monorepo; the site only surfaces them. Defaults via Coolify env (`SANDBOX_*`): per sandbox 40 model turns · 200k tokens · 3 uploads ≤ 10 MiB · 120-min sliding TTL; per day 1,500 turns · 6M tokens · 300 sandboxes; 10 new sandboxes per IP per hour. Contract: `../kerniva/packages/contracts/src/sandbox.ts` (`SANDBOX_PROMISE` is the canonical data-handling wording; `src/pages/privacy.tsx` states it in prose; keep them in step).
+Enforced server-side in the monorepo; the site only surfaces them. Defaults via environment (`SANDBOX_*`): per sandbox 40 model turns · 200k tokens · 3 uploads ≤ 10 MiB · 120-min sliding TTL; per day 1,500 turns · 6M tokens · 300 sandboxes; 10 new sandboxes per IP per hour. Contract: `../kerniva/packages/contracts/src/sandbox.ts` (`SANDBOX_PROMISE` is the canonical data-handling wording; `src/pages/privacy.tsx` states it in prose; keep them in step).
 
 ## Bot and scraper posture
 
@@ -106,7 +128,7 @@ Cloudflare WAF/Bot Fight Mode in front; `public/robots.txt` allows the marketing
 
 - **No em dashes anywhere in this repo**, in site copy, comments, or docs. Use a colon, semicolon, comma, or parentheses instead. `.feature-list` bullets are drawn in CSS as a rule, not typed as a character.
 
-- **`src/content.tsx` holds every piece of user-visible prose on the site.** Edit copy there, not in the components. Three things stay out of it by design: the header and footer link tables (label plus href routing tables rendered by three different link components), the partner marks in `components/backers.tsx` (inline SVG live text, and one glyph per brand colour for Google, so the copy is fused to styling), and `aria-label` / `alt` / `role` strings, which belong next to the element they describe. Two rules when touching it. The literal arrays are `as const` because several consumers branch on a field only one element has (`"solid" in step`, `"active" in item`, `"src" in tool`); annotating those as optional instead turns the `in` checks into dead code. And where the landing page and a standalone page say the same thing, one const is shared by both (the Research lede, `INTEGRITY`, `ARTIFACTS`, `COMPANY_WHERE`), so editing it changes both surfaces; where the wording already differs, usually a trailing period on the page title, the two are deliberately kept apart. `HOME_TYPE_PHRASES` must stay a module-level binding: `useTypewriter` restarts its effect if the array identity changes, so never spread or map it at the call site. The tagline also lives in `index.html`'s `<title>` and og tags, which the module cannot reach.
+- **`src/content.tsx` holds every piece of user-visible prose on the site.** Edit copy there, not in the components. The one piece of prose that cannot live there is the confirmation email in `shared/confirmation.ts`, because the forms API cannot import a React module. Three things on the site itself stay out of it by design: the header and footer link tables (label plus href routing tables rendered by three different link components), the partner marks in `components/backers.tsx` (inline SVG live text, and one glyph per brand colour for Google, so the copy is fused to styling), and `aria-label` / `alt` / `role` strings, which belong next to the element they describe. Two rules when touching it. The literal arrays are `as const` because several consumers branch on a field only one element has (`"solid" in step`, `"active" in item`, `"src" in tool`); annotating those as optional instead turns the `in` checks into dead code. And where the landing page and a standalone page say the same thing, one const is shared by both (the Research lede, `INTEGRITY`, `ARTIFACTS`, `COMPANY_WHERE`), so editing it changes both surfaces; where the wording already differs, usually a trailing period on the page title, the two are deliberately kept apart. `HOME_TYPE_PHRASES` must stay a module-level binding: `useTypewriter` restarts its effect if the array identity changes, so never spread or map it at the call site. The tagline also lives in `index.html`'s `<title>` and og tags, which the module cannot reach.
 - Single-page app, routes in `src/app.tsx`. Everything sits under `components/site-layout.tsx` except `/demo`, which carries its own stripped bar and footer by design. Each page sets `document.title` through `PageHeader` or an effect.
 - `src/styles.css` is the whole design system, ported from the "Industry" blueprint handoff: ground `#f2f2f3`, ink `#2e1157`, accent `#5b0077` (hover `#6e2387`, pressed `#4d0064`), a navy secondary ramp to `#0a1b4d`, hairline dividers at 18% navy. **Radius 0 everywhere.** The signature object is `.blueprint`: a 1px frame with four "+" registration crosses overhanging the corners, rendered by `components/blueprint.tsx`. Type is Barlow Condensed 600 uppercase for headings over Barlow for body. The only inverted surfaces are the primary button and the solid step marker (`.step-num--solid`); no gradients, no white cards. `public/kerniva-gradient.svg` and `kerniva-tile.svg` keep the original `#532671 → #1a1f4d` gradient, which now appears only in the mark itself.
 - Animation is split on purpose. **Orchestration** uses `motion/react` (the `motion` package): the entrance choreography, scroll reveal (`whileInView`, once), the cycling highlights, and the demo form's enter/exit. Shared curves and the cycle colours live in `components/transitions.ts`; import from there rather than retyping an easing. **Always-on decorative loops** (marquee, dashed hero lines, pulse, float, caret blink) stay as `kv-*` CSS keyframes in `styles.css`, because they run for as long as the page is open and belong on the compositor, not in rAF. Do not migrate those to Motion.
@@ -117,6 +139,6 @@ Cloudflare WAF/Bot Fight Mode in front; `public/robots.txt` allows the marketing
 - Reduced motion is gated twice, because neither mechanism reaches the other: `<MotionConfig reducedMotion="user">` in `main.tsx` covers Motion's inline styles, and the `prefers-reduced-motion` block in `styles.css` kills the CSS loops.
 - `components/anim.tsx` holds the two effects Motion does not help with: `useAutoCycle` (a self-advancing index; **not** Motion's own `useCycle`, which is a manual [state, cycle] pair) and `useTypewriter`. It is named `anim`, not `motion`, so it cannot be confused with the package.
 - Both marquees (the integrations tiles and the backer strip) put their gap on **each item** as `margin-left`/`margin-right`, never as `gap` on the track. `kv-marquee` shifts the track by `translateX(-50%)`, which only equals exactly one set width if every item's box carries its own trailing space; with `gap` on the track the loop lands half a gap short and visibly jumps once per cycle.
-- Partner marks in the backer strip (`components/backers.tsx`) are inline SVG and live text, never images: no request, no grayscale filter, crisp at any density. Tool logos in the integrations marquee are **vendored** into `public/logos/` rather than pulled from `cdn.simpleicons.org`, so the CSP stays as tight as it is. Adding an external image or script means editing the CSP in both `nginx.conf` and `infra/opentofu/main.tf`.
+- Partner marks in the backer strip (`components/backers.tsx`) are inline SVG and live text, never images: no request, no grayscale filter, crisp at any density. Tool logos in the integrations marquee are **vendored** into `public/logos/` rather than pulled from `cdn.simpleicons.org`, so the CSP stays as tight as it is. Adding an external image or script means editing the CSP in `nginx.conf`.
 - The landing page's nav entries are anchors into its own sections (`#product`, `#how`, `#research`, `#security`, `#company`, `#faq`); `components/section-link.tsx` renders a plain anchor on `/` and a router link elsewhere. The standalone routes (`/product`, `/research`, `/security`, `/about`, ...) still exist and stay reachable from the footer.
 - All three forms go through `useFormSubmit` in `src/forms/submit.ts`, which owns the token, the honeypot, the in-flight state, and the error path. A failed send must never render as a confirmation.
