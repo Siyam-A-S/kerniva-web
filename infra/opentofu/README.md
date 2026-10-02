@@ -108,3 +108,54 @@ az containerapp revision list --subscription $SUB -g rg-kerniva-site -n ca-kerni
 az containerapp update --subscription $SUB -g rg-kerniva-site -n ca-kerniva-site \
   --image acrkernivasite.azurecr.io/kerniva-site:sha-<previous commit>
 ```
+
+## Mail
+
+Automated mail (this site's forms, the product demo's invitations) goes through Azure Communication Services Email as `noreply@kerniva.app`. It is defined in `mail.tf` and lives in `rg-kerniva-mail`, apart from both senders. Mail written by people stays on Google Workspace, which also still receives everything sent to the domain.
+
+| Resource                           | Name                                     |
+| ---------------------------------- | ---------------------------------------- |
+| Communication service              | `acs-kerniva`                            |
+| Email service                      | `ecs-kerniva`                            |
+| Domain                             | `kerniva.app` (customer managed)         |
+| Entra applications allowed to send | `kerniva-site-mail`, `kerniva-demo-mail` |
+
+**Setting it up.** The domain has to be proven with DNS before anything can send:
+
+1. `tofu output mail_dns_records` lists the records. Publish them in Cloudflare: the `ms-domain-verification` TXT on the apex, and the two DKIM CNAMEs set to **DNS only** (a proxied CNAME cannot be verified).
+2. SPF must stay **one** record. Add Microsoft's include to the existing Google one instead of creating a second: `v=spf1 include:_spf.google.com include:spf.protection.outlook.com ~all`.
+3. Ask Azure to check each one, then wait for all four to read `Verified`:
+
+   ```bash
+   for t in Domain SPF DKIM DKIM2; do
+     az communication email domain initiate-verification --subscription $SUB -g rg-kerniva-mail \
+       --email-service-name ecs-kerniva --domain-name kerniva.app --verification-type $t
+   done
+   az communication email domain show --subscription $SUB -g rg-kerniva-mail \
+     --email-service-name ecs-kerniva --domain-name kerniva.app --query verificationStates
+   ```
+
+4. Set `mail_domain_verified = true` in `site.auto.tfvars` and apply. That connects the domain to the communication service and registers the `noreply` sender.
+
+**Credentials.** SMTP signs in as an Entra application, so no mailbox or person is involved:
+
+- host `smtp.azurecomm.net`, port 587, STARTTLS
+- username `acs-kerniva.<application client id>.<tenant id>`
+- password: a client secret of that application
+
+Create the site's secret and store it where `tofu` will read it, without it touching the terminal history:
+
+```bash
+SECRET=$(az ad app credential reset --id <kerniva-site-mail client id> --append \
+  --display-name site-smtp --years 1 --query password -o tsv)
+sed -i '/^smtp_pass/d' secrets.auto.tfvars && printf 'smtp_pass = "%s"\n' "$SECRET" >> secrets.auto.tfvars
+unset SECRET
+```
+
+The secret expires. Rotate it before then with the same commands, apply, and delete the old credential (`az ad app credential list` / `delete`). The role the applications hold (`Kerniva mail sender`) allows sending and nothing else.
+
+**Limits.** A new communication service starts with low sending limits (tens of messages a minute, about a hundred an hour). That covers form notices and invitations; a higher quota is a support request to Azure.
+
+## A false "has been deleted"
+
+Azure can briefly answer "not found" for a resource that exists, most often after one of the same name was deleted and recreated. `tofu plan` then reports it as deleted and plans to recreate it, and for the environment that would mean replacing the running site. `prevent_destroy` on the environment and the app turns such a plan into an error. If you see it: do not apply, confirm the resource exists with `az`, and plan again.

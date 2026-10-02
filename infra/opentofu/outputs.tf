@@ -29,3 +29,15 @@ output "environment_static_ip" {
 output "site_identity_client_id" {
   value = azurerm_user_assigned_identity.site.client_id
 }
+
+# The records to publish in DNS so Azure will send as the domain: one TXT that
+# proves ownership, an SPF value, and two DKIM CNAMEs.
+output "mail_dns_records" {
+  value = azurerm_email_communication_service_domain.kerniva.verification_records
+}
+
+# First part of the SMTP username, which is
+# <this>.<application (client) id>.<tenant id>.
+output "mail_service_name" {
+  value = azurerm_communication_service.mail.name
+}

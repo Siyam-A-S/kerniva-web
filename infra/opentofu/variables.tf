@@ -61,8 +61,9 @@ variable "form_token_secret" {
 }
 
 variable "smtp_host" {
-  type    = string
-  default = "smtp.gmail.com"
+  description = "Azure Communication Services' SMTP endpoint (mail.tf)."
+  type        = string
+  default     = "smtp.azurecomm.net"
 }
 
 variable "smtp_port" {
@@ -71,20 +72,20 @@ variable "smtp_port" {
 }
 
 variable "smtp_user" {
-  description = "The Google Workspace account that sends."
+  description = "SMTP username: <communication service name>.<client id of the kerniva-site-mail application>.<tenant id>. It names an Entra application, not a mailbox."
   type        = string
-  default     = "noreply@kerniva.app"
+  default     = ""
 }
 
 variable "smtp_pass" {
-  description = "That account's app password. Set through TF_VAR_smtp_pass. Empty deploys the site with forms refusing submissions."
+  description = "A client secret of that application. Set through TF_VAR_smtp_pass or a gitignored tfvars file. Empty deploys the site with forms refusing submissions."
   type        = string
   default     = ""
   sensitive   = true
 }
 
 variable "mail_from" {
-  description = "From header. Keep it the same account as smtp_user, or Gmail rewrites it."
+  description = "From header. The address must be a sender username registered on the mail domain (mail.tf), or the message is refused."
   type        = string
   default     = "Kerniva <noreply@kerniva.app>"
 }
@@ -111,4 +112,34 @@ variable "ingress_allowed_cidrs" {
   description = "When non-empty, only these ranges reach the app. Set to Cloudflare's IPv4 ranges (https://www.cloudflare.com/ips-v4) after cutover."
   type        = list(string)
   default     = []
+}
+
+# ---- mail (mail.tf) -----------------------------------------------------------------------------
+
+variable "mail_resource_group_name" {
+  type    = string
+  default = "rg-kerniva-mail"
+}
+
+variable "mail_service_name" {
+  description = "Globally unique. It is also the first part of every SMTP username."
+  type        = string
+  default     = "acs-kerniva"
+}
+
+variable "mail_domain" {
+  type    = string
+  default = "kerniva.app"
+}
+
+variable "mail_domain_verified" {
+  description = "Set true once the domain's DNS records are published and Azure reports them verified. Until then the domain cannot be connected or sent from."
+  type        = bool
+  default     = false
+}
+
+variable "mail_sender_principal_ids" {
+  description = "Service principal object IDs allowed to send over SMTP, keyed by a label (site, demo)."
+  type        = map(string)
+  default     = {}
 }

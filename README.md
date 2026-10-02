@@ -15,4 +15,4 @@ Pages: `/`, `/product`, `/solutions`, `/research`, `/security`, `/pricing`, `/ab
 
 Hosting: **Azure Container Apps behind Cloudflare.** One container runs nginx (the site, security headers, CSP) with the forms API beside it on loopback. `infra/opentofu` defines the Azure resources and its README is the runbook; `.github/workflows/deploy-site.yml` builds the image and rolls the app after CI passes on `main`. The move from the previous Coolify host is in progress: see the hosting section of `CLAUDE.md` for which one is serving production.
 
-Mail goes out through Google Workspace SMTP. `api/.env.example` lists every variable the API reads.
+Automated mail goes out through Azure Communication Services Email as `noreply@kerniva.app`; people's mailboxes stay on Google Workspace. `api/.env.example` lists every variable the API reads.

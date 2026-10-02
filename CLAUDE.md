@@ -77,6 +77,14 @@ a second origin would mean editing the CSP in two files and enabling CORS.
   `index.ts` only wires them to a port. Keep `nodemailer` out of everything but
   `mail.ts`: the root `pnpm test` runs the API tests without the API's
   dependencies installed.
+- **Automated mail goes through Azure Communication Services Email**, not a
+  person's mailbox (`infra/opentofu/mail.tf`, resource group `rg-kerniva-mail`,
+  shared with the product demo). SMTP signs in as an Entra application
+  (`kerniva-site-mail`) whose client secret is `SMTP_PASS`; that secret expires
+  and must be rotated. `From` must be `noreply@kerniva.app`, the one sender
+  registered on the domain. Google Workspace still receives all mail for the
+  domain and is what people send from, so the SPF record lists both and must
+  stay a single record.
 - Configuration is environment only; see `api/.env.example`. With no
   `SMTP_HOST` in production the API still starts, logs loudly, reports
   `mailConfigured:false` on `/api/health`, and refuses submissions with a 503

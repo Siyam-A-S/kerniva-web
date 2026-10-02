@@ -73,6 +73,15 @@ resource "azurerm_container_app_environment" "site" {
   logs_destination = "azure-monitor"
 
   tags = local.tags
+
+  # Azure can briefly answer "not found" for a resource that exists, most
+  # often after one of the same name was deleted and recreated. A plan built
+  # on that answer wants to recreate the environment and replace the app in
+  # it, which would take the site down and change its hostname. This turns
+  # that plan into an error. To really remove it, delete this block first.
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "azurerm_monitor_diagnostic_setting" "environment" {
@@ -288,6 +297,10 @@ resource "azurerm_container_app" "site" {
   }
 
   lifecycle {
+    # See the environment above: a false "not found" must not replace the
+    # running site.
+    prevent_destroy = true
+
     # The pipeline owns the image tag: every push to main rolls a new
     # sha-tagged revision with `az containerapp update`. Without this the next
     # apply would roll the site back to whatever tag was last written here.
