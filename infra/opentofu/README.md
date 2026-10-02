@@ -123,7 +123,7 @@ Automated mail (this site's forms, the product demo's invitations) goes through 
 **Setting it up.** The domain has to be proven with DNS before anything can send:
 
 1. `tofu output mail_dns_records` lists the records. Publish them in Cloudflare: the `ms-domain-verification` TXT on the apex, and the two DKIM CNAMEs set to **DNS only** (a proxied CNAME cannot be verified).
-2. SPF must stay **one** record. Add Microsoft's include to the existing Google one instead of creating a second: `v=spf1 include:_spf.google.com include:spf.protection.outlook.com ~all`.
+2. SPF must stay **one** record. Add Microsoft's include to the existing Google one instead of creating a second: `v=spf1 include:_spf.google.com include:spf.protection.outlook.com -all`. It has to end in `-all`: with `~all` Azure's check fails with `DnsRecordsNotMatched`, and the domain cannot be connected until SPF verifies. Any other service that sends as the domain must be added to this record first, or its mail is rejected.
 3. Ask Azure to check each one, then wait for all four to read `Verified`:
 
    ```bash
