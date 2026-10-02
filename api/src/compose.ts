@@ -106,8 +106,9 @@ export function composeConfirmation(kind: FormKind, fields: Clean, from: string)
     to,
     subject,
     text: body,
-    // A reply should reach the people who received the submission.
-    replyTo: routeFor(kind, fields),
+    // No Reply-To: this is a no-reply notice. The body names the address to
+    // write to instead, and the conversation continues when the team answers
+    // the submission itself.
     // Tells autoresponders not to answer, so two robots never loop.
     headers: { "Auto-Submitted": "auto-generated" },
   };

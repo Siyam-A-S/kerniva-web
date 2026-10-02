@@ -66,7 +66,10 @@ a second origin would mean editing the CSP in two files and enabling CORS.
   whole from `shared/confirmation.ts`, and nothing the visitor typed is placed
   in it, not even their name. One per address per day, a daily ceiling of its
   own below the overall one, sent only after the team mail succeeds, never
-  awaited, and its failure never changes the response. The form's on-screen
+  awaited, and its failure never changes the response. It is a no-reply
+  notice: no `Reply-To`, and the body names `contact@kerniva.app` instead. The
+  mail to the team keeps the visitor in `Reply-To`, which is how the team
+  answers them. The form's on-screen
   confirmation must not promise an email, since one may be skipped.
 - The API is split so it can be tested without a mail server: `compose.ts`
   builds messages and reads SMTP settings (no mail library), `mail.ts` owns the

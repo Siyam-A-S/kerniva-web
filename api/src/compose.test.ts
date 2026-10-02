@@ -113,11 +113,13 @@ describe("composeConfirmation", () => {
     expect(m?.text).toBe(CONFIRMATIONS[kind].body);
   });
 
-  it("goes only to the visitor, from us, with replies routed to the team", () => {
+  it("goes only to the visitor, from us, as a no-reply notice", () => {
     const m = composeConfirmation("contact", hostile, FROM);
     expect(m?.to).toBe("visitor@example.com");
     expect(m?.from).toBe(FROM);
-    expect(m?.replyTo).toBe("security@kerniva.app");
+    expect(m).not.toHaveProperty("replyTo");
+    expect(m?.text).toContain("replies to it are not read");
+    expect(m?.text).toContain("contact@kerniva.app");
     expect(m?.headers).toEqual({ "Auto-Submitted": "auto-generated" });
   });
 

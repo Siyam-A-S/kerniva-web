@@ -8,11 +8,13 @@
  * anything echoed back could be aimed at a stranger's inbox. A fixed note is
  * useless to someone trying to send their own text through our domain.
  */
-import type { FormKind } from "./forms.js";
+import { EMAIL_CONTACT, type FormKind } from "./forms.js";
 
 export type Confirmation = { subject: string; body: string };
 
 const SIGN_OFF = [
+  `This is an automated message and replies to it are not read. To reach us, write to ${EMAIL_CONTACT}.`,
+  "",
   "If you did not fill in a form on kerniva.app, you can ignore this email. Nothing else will be sent.",
   "",
   "Kerniva",
