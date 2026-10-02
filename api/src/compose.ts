@@ -54,7 +54,6 @@ export function mailFrom(env: Env = process.env): string {
 
 const SUBJECTS: Record<FormKind, string> = {
   contact: "Contact",
-  waitlist: "Waitlist signup",
   demo: "Demo request",
 };
 

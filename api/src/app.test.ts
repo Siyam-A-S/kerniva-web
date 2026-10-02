@@ -72,13 +72,13 @@ function setup(overrides: Partial<Deps> = {}) {
 }
 
 let people = 0;
-/** A valid waitlist submission from an address no other test has used. */
-function waitlist(extra: Record<string, unknown> = {}) {
+/** A valid demo request from an address no other test has used. */
+function demo(extra: Record<string, unknown> = {}) {
   people += 1;
   return {
     name: "Ada",
     email: `ada${people}@example.com`,
-    work: "research",
+    teamSize: "11–50",
     token: agedToken(),
     ...extra,
   };
@@ -100,14 +100,14 @@ describe("health", () => {
 describe("request checks", () => {
   it("refuses another site's origin", async () => {
     const { post, sendSubmission } = setup();
-    const r = await post("waitlist", waitlist(), { origin: "https://evil.example" });
+    const r = await post("demo", demo(), { origin: "https://evil.example" });
     expect(r.status).toBe(403);
     expect(sendSubmission).not.toHaveBeenCalled();
   });
 
   it("refuses anything that is not JSON", async () => {
     const { post } = setup();
-    const r = await post("waitlist", "name=Ada", {
+    const r = await post("demo", "name=Ada", {
       "content-type": "application/x-www-form-urlencoded",
     });
     expect(r.status).toBe(415);
@@ -115,19 +115,19 @@ describe("request checks", () => {
 
   it("refuses a form that does not exist", async () => {
     const { post } = setup();
-    expect((await post("newsletter", waitlist())).status).toBe(404);
+    expect((await post("newsletter", demo())).status).toBe(404);
   });
 
   it("refuses a missing or fresh token", async () => {
     const { post, sendSubmission } = setup();
-    expect((await post("waitlist", waitlist({ token: undefined }))).status).toBe(400);
-    expect((await post("waitlist", waitlist({ token: issueToken() }))).status).toBe(400);
+    expect((await post("demo", demo({ token: undefined }))).status).toBe(400);
+    expect((await post("demo", demo({ token: issueToken() }))).status).toBe(400);
     expect(sendSubmission).not.toHaveBeenCalled();
   });
 
   it("answers a tripped honeypot with success and sends nothing", async () => {
     const { post, sendSubmission, sendConfirmation } = setup();
-    const r = await post("waitlist", waitlist({ website: "https://spam.example" }));
+    const r = await post("demo", demo({ website: "https://spam.example" }));
     await settle();
     expect(r).toEqual({ status: 200, body: { ok: true } });
     expect(sendSubmission).not.toHaveBeenCalled();
@@ -136,7 +136,7 @@ describe("request checks", () => {
 
   it("refuses submissions, with an address to write to, when mail is not configured", async () => {
     const { post, sendSubmission } = setup({ mailMisconfigured: true });
-    const r = await post("waitlist", waitlist());
+    const r = await post("demo", demo());
     expect(r.status).toBe(503);
     expect(r.body.error).toContain("contact@kerniva.app");
     expect(sendSubmission).not.toHaveBeenCalled();
@@ -146,21 +146,21 @@ describe("request checks", () => {
 describe("a delivered submission", () => {
   it("is mailed to the team and acknowledged to the visitor", async () => {
     const { post, sendSubmission, sendConfirmation } = setup();
-    const body = waitlist();
-    const r = await post("waitlist", body);
+    const body = demo();
+    const r = await post("demo", body);
     await settle();
     expect(r).toEqual({ status: 200, body: { ok: true } });
     expect(sendSubmission).toHaveBeenCalledTimes(1);
     expect(sendConfirmation).toHaveBeenCalledTimes(1);
     expect(sendConfirmation).toHaveBeenCalledWith(
-      "waitlist",
+      "demo",
       expect.objectContaining({ email: body.email }),
     );
   });
 
   it("is not acknowledged when confirmations are switched off", async () => {
     const { post, sendSubmission, sendConfirmation } = setup({ confirmations: false });
-    expect((await post("waitlist", waitlist())).status).toBe(200);
+    expect((await post("demo", demo())).status).toBe(200);
     await settle();
     expect(sendSubmission).toHaveBeenCalledTimes(1);
     expect(sendConfirmation).not.toHaveBeenCalled();
@@ -172,7 +172,7 @@ describe("a delivered submission", () => {
       throw new Error("550 no such user");
     });
     const { post } = setup({ sendConfirmation });
-    const r = await post("waitlist", waitlist());
+    const r = await post("demo", demo());
     await settle();
     expect(r).toEqual({ status: 200, body: { ok: true } });
     expect(sendConfirmation).toHaveBeenCalledTimes(1);
@@ -185,8 +185,8 @@ describe("a delivered submission", () => {
         throw new Error("refused");
       }),
     });
-    const body = waitlist();
-    await post("waitlist", body);
+    const body = demo();
+    await post("demo", body);
     await settle();
     expect(JSON.stringify(log.mock.calls)).not.toContain(body.email);
   });
@@ -195,7 +195,7 @@ describe("a delivered submission", () => {
     const { post, sendSubmission, sendConfirmation } = setup();
     const email = "repeat-target@example.com";
     for (const variant of [email, email.toUpperCase(), ` ${email} `]) {
-      expect((await post("waitlist", waitlist({ email: variant }))).status).toBe(200);
+      expect((await post("demo", demo({ email: variant }))).status).toBe(200);
     }
     await settle();
     expect(sendSubmission).toHaveBeenCalledTimes(3);
@@ -207,8 +207,8 @@ describe("a token", () => {
   it("delivers one submission and is refused the second time", async () => {
     const { post, sendSubmission } = setup();
     const token = agedToken();
-    expect((await post("waitlist", waitlist({ token }))).status).toBe(200);
-    const again = await post("waitlist", waitlist({ token }));
+    expect((await post("demo", demo({ token }))).status).toBe(200);
+    const again = await post("demo", demo({ token }));
     expect(again.status).toBe(400);
     expect(again.body.error).toMatch(/reload/i);
     expect(sendSubmission).toHaveBeenCalledTimes(1);
@@ -217,8 +217,8 @@ describe("a token", () => {
   it("survives a typo, so the visitor can correct it and resubmit", async () => {
     const { post, sendSubmission } = setup();
     const token = agedToken();
-    expect((await post("waitlist", waitlist({ token, email: "not-an-address" }))).status).toBe(400);
-    expect((await post("waitlist", waitlist({ token }))).status).toBe(200);
+    expect((await post("demo", demo({ token, email: "not-an-address" }))).status).toBe(400);
+    expect((await post("demo", demo({ token }))).status).toBe(200);
     expect(sendSubmission).toHaveBeenCalledTimes(1);
   });
 });
@@ -231,16 +231,16 @@ describe("a failed send", () => {
       .mockRejectedValueOnce(new Error("connection refused"))
       .mockResolvedValue(undefined);
     const { post, sendConfirmation } = setup({ sendSubmission });
-    const body = waitlist();
+    const body = demo();
 
-    const failed = await post("waitlist", body);
+    const failed = await post("demo", body);
     await settle();
     expect(failed.status).toBe(502);
     expect(failed.body.ok).toBe(false);
     expect(sendConfirmation).not.toHaveBeenCalled();
 
     // Same token: the first attempt delivered nothing, so it was handed back.
-    const retried = await post("waitlist", body);
+    const retried = await post("demo", body);
     await settle();
     expect(retried.status).toBe(200);
     expect(sendConfirmation).toHaveBeenCalledTimes(1);

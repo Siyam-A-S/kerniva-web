@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Corners } from "./blueprint";
-import { BTN_BOOK_DEMO, BTN_JOIN_WAITLIST, CTA_DEFAULT } from "../content";
+import { BTN_BOOK_DEMO, BTN_OPEN_WORKSPACE, CTA_DEFAULT, LIVE_URL } from "../content";
 
 export function Cta({
   title = CTA_DEFAULT.title,
@@ -18,9 +18,9 @@ export function Cta({
             <p>{body}</p>
           </div>
           <div className="hero__actions">
-            <Link to="/waitlist" className="btn btn--secondary btn--lg">
-              {BTN_JOIN_WAITLIST}
-            </Link>
+            <a href={LIVE_URL} className="btn btn--secondary btn--lg">
+              {BTN_OPEN_WORKSPACE}
+            </a>
             <Link to="/demo" className="btn btn--primary btn--lg blueprint">
               <Corners />
               {BTN_BOOK_DEMO}

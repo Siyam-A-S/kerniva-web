@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { SiteLayout } from "./components/site-layout";
 import { HomePage } from "./pages/home";
 import { ProductPage } from "./pages/product";
@@ -10,7 +10,6 @@ import { AboutPage } from "./pages/about";
 import { ContactPage } from "./pages/contact";
 import { NotFoundPage } from "./pages/not-found";
 import { PrivacyPage } from "./pages/privacy";
-import { WaitlistPage } from "./pages/waitlist";
 import { DemoPage } from "./pages/demo";
 
 export function App() {
@@ -25,10 +24,10 @@ export function App() {
         <Route path="pricing" element={<PricingPage />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="contact" element={<ContactPage />} />
-        <Route path="waitlist" element={<WaitlistPage />} />
-        {/* The live simulation (/try) stays parked behind the waitlist until
-            the sandbox stack is hosted. */}
-        <Route path="try" element={<WaitlistPage />} />
+        {/* Old links. The waitlist is gone: a workspace now comes from booking
+            a demo, so both land there. */}
+        <Route path="waitlist" element={<Navigate to="/demo" replace />} />
+        <Route path="try" element={<Navigate to="/demo" replace />} />
         <Route path="privacy" element={<PrivacyPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

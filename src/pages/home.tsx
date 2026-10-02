@@ -12,7 +12,7 @@ import { useAutoCycle, useTypewriter } from "../components/anim";
 import {
   ARTIFACTS,
   BTN_BOOK_DEMO,
-  BTN_JOIN_WAITLIST,
+  BTN_OPEN_WORKSPACE,
   COMPANY_HIRING,
   COMPANY_LEDE,
   COMPANY_WHERE,
@@ -27,6 +27,7 @@ import {
   HOME_INTEGRATIONS,
   HOME_MOCK,
   HOME_NEXT_STEP,
+  LIVE_URL,
   HOME_RAIL as RAIL,
   HOME_RESEARCH,
   HOME_SECURITY,
@@ -845,9 +846,9 @@ function NextStep() {
             <Corners />
             {BTN_BOOK_DEMO}
           </Link>
-          <Link to="/waitlist" className="btn btn--secondary btn--lg">
-            {BTN_JOIN_WAITLIST}
-          </Link>
+          <a href={LIVE_URL} className="btn btn--secondary btn--lg">
+            {BTN_OPEN_WORKSPACE}
+          </a>
         </div>
       </div>
     </motion.section>

@@ -12,8 +12,6 @@ const routes = [
   "/pricing",
   "/about",
   "/contact",
-  "/waitlist",
-  "/try",
   "/demo",
   "/privacy",
   "/nope",
@@ -32,12 +30,39 @@ describe("every route renders", () => {
   }
 });
 
-it("the demo route is not the waitlist page", () => {
+it("the demo route is the booking form and points at the live workspace", () => {
   const html = renderToString(
     <MemoryRouter initialEntries={["/demo"]}>
       <App />
     </MemoryRouter>,
   );
   expect(html).toContain("Demo request");
-  expect(html).not.toContain("The live simulation is almost ready");
+  expect(html).toContain('href="https://live.kerniva.app"');
+});
+
+// Old links: the waitlist is gone, and both used to render it.
+describe("retired routes send visitors to the demo page", () => {
+  for (const route of ["/waitlist", "/try"]) {
+    it(route, () => {
+      const html = renderToString(
+        <MemoryRouter initialEntries={[route]}>
+          <App />
+        </MemoryRouter>,
+      );
+      // A redirect renders nothing on the server; in the browser it lands on
+      // /demo. What must not happen is the not-found page.
+      expect(html).not.toContain("Join the waitlist");
+      expect(html).not.toContain("404");
+    });
+  }
+});
+
+it("nothing on the home page offers a waitlist", () => {
+  const html = renderToString(
+    <MemoryRouter initialEntries={["/"]}>
+      <App />
+    </MemoryRouter>,
+  );
+  expect(html.toLowerCase()).not.toContain("waitlist");
+  expect(html).toContain('href="https://live.kerniva.app"');
 });

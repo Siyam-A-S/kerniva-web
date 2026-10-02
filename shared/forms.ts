@@ -1,5 +1,5 @@
 /**
- * The wire contract for the three site forms, shared by the browser and the
+ * The wire contract for the site forms (contact and demo request), shared by the browser and the
  * API so validation cannot drift between them. Pure data: no React, no Node,
  * so both sides can import it.
  *
@@ -13,14 +13,11 @@ export const EMAIL_SALES = "sales@kerniva.app";
 export const EMAIL_SUPPORT = "support@kerniva.app";
 export const EMAIL_SECURITY = "security@kerniva.app";
 
-export const FORM_KINDS = ["contact", "waitlist", "demo"] as const;
+export const FORM_KINDS = ["contact", "demo"] as const;
 export type FormKind = (typeof FORM_KINDS)[number];
 
 export const CONTACT_INTEREST_VALUES = ["enterprise", "research", "security", "other"] as const;
 export type ContactInterest = (typeof CONTACT_INTEREST_VALUES)[number];
-
-export const WAITLIST_WORK_VALUES = ["consulting", "research", "product", "other"] as const;
-export type WaitlistWork = (typeof WAITLIST_WORK_VALUES)[number];
 
 export const DEMO_TEAM_SIZE_VALUES = ["1–10", "11–50", "51–200", "200+"] as const;
 export type DemoTeamSize = (typeof DEMO_TEAM_SIZE_VALUES)[number];
@@ -71,12 +68,6 @@ export const FORM_FIELDS: Record<FormKind, readonly FieldSpec[]> = {
     { name: "interest", required: true, oneOf: CONTACT_INTEREST_VALUES },
     { name: "message", required: false, max: MAX.message },
   ],
-  waitlist: [
-    { name: "name", required: true, max: MAX.name },
-    { name: "email", required: true, max: MAX.email, email: true },
-    { name: "org", required: false, max: MAX.org },
-    { name: "work", required: true, oneOf: WAITLIST_WORK_VALUES },
-  ],
   demo: [
     { name: "name", required: true, max: MAX.name },
     { name: "email", required: true, max: MAX.email, email: true },
@@ -96,7 +87,6 @@ export const CONTACT_ROUTES: Record<ContactInterest, string> = {
 
 export const FORM_ROUTES: Record<FormKind, string> = {
   contact: EMAIL_CONTACT, // refined per interest by CONTACT_ROUTES
-  waitlist: EMAIL_CONTACT,
   demo: EMAIL_SALES,
 };
 

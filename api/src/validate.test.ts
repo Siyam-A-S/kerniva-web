@@ -83,9 +83,7 @@ describe("validate", () => {
     expect(validate("contact", null)).toMatchObject({ ok: false });
   });
 
-  it("validates the waitlist and demo shapes too", () => {
-    expect(validate("waitlist", { name: "A", email: "a@b.co", work: "consulting" }).ok).toBe(true);
-    expect(validate("waitlist", { name: "A", email: "a@b.co", work: "nope" }).ok).toBe(false);
+  it("validates the demo shape too", () => {
     expect(validate("demo", { name: "A", email: "a@b.co", teamSize: "11–50" }).ok).toBe(true);
     expect(validate("demo", { name: "A", email: "a@b.co", teamSize: "9000" }).ok).toBe(false);
   });

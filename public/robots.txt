@@ -1,4 +1,4 @@
-# Marketing pages are indexable. /try is parked on the waitlist; /demo is a real page.
+# Marketing pages are indexable.
 User-agent: *
 Allow: /
 

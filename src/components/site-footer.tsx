@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { SectionLink } from "./section-link";
+import { BTN_SIGN_IN, LIVE_URL } from "../content";
 
 /**
  * The design's footer is a single status row. The link columns above it are
@@ -65,7 +66,7 @@ export function SiteFooter() {
                 <Link to="/demo">Book a demo</Link>
               </li>
               <li>
-                <Link to="/waitlist">Join the waitlist</Link>
+                <a href={LIVE_URL}>{BTN_SIGN_IN}</a>
               </li>
               <li>
                 <Link to="/privacy">Privacy</Link>

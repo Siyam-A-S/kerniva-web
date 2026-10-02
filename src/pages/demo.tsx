@@ -5,10 +5,11 @@ import { Corners } from "../components/blueprint";
 import { CheckCircleIcon } from "../components/icons";
 import { EASE } from "../components/transitions";
 import {
-  BTN_JOIN_WAITLIST,
+  BTN_SIGN_IN,
   DEMO_PAGE,
   DEMO_PROMISES,
   DEMO_TEAM_SIZES,
+  LIVE_URL,
   TAGLINE,
   TITLE_DEMO,
 } from "../content";
@@ -21,7 +22,8 @@ const muted = (pct: number) => `color-mix(in srgb, var(--color-text) ${pct}%, tr
 
 /**
  * The demo page deliberately runs outside SiteLayout: the design strips the
- * full site nav down to a way back and a single alternative.
+ * full site nav down to a way back and a way in for someone who has already
+ * signed up.
  */
 export function DemoPage() {
   const { state, onSubmit } = useFormSubmit("demo", FIELDS);
@@ -41,13 +43,13 @@ export function DemoPage() {
           <Link to="/" style={{ whiteSpace: "nowrap" }}>
             {DEMO_PAGE.back}
           </Link>
-          <Link
-            to="/waitlist"
+          <a
+            href={LIVE_URL}
             className="btn btn--ghost"
             style={{ whiteSpace: "nowrap", marginLeft: "auto" }}
           >
-            {DEMO_PAGE.waitlistInstead}
-          </Link>
+            {BTN_SIGN_IN}
+          </a>
         </div>
       </header>
 
@@ -166,10 +168,10 @@ export function DemoPage() {
                       flexWrap: "wrap",
                     }}
                   >
-                    <Link to="/waitlist" className="btn btn--primary blueprint">
+                    <a href={LIVE_URL} className="btn btn--primary blueprint">
                       <Corners />
-                      {BTN_JOIN_WAITLIST}
-                    </Link>
+                      {DEMO_PAGE.openLive}
+                    </a>
                     <Link to="/" className="btn btn--ghost">
                       {DEMO_PAGE.backToSite}
                     </Link>

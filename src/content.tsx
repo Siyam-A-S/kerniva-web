@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import type { ContactInterest, DemoTeamSize, WaitlistWork } from "../shared/forms";
+import type { ContactInterest, DemoTeamSize } from "../shared/forms";
 import {
   AuditIcon,
   BotIcon,
@@ -54,12 +54,20 @@ export const TITLE_DEMO = "Book a demo | Kerniva";
 export { EMAIL_CONTACT, EMAIL_SALES, EMAIL_SECURITY, EMAIL_SUPPORT } from "../shared/forms";
 
 export const BTN_BOOK_DEMO = "Book a demo";
-export const BTN_JOIN_WAITLIST = "Join the waitlist";
+export const BTN_OPEN_WORKSPACE = "Open your workspace";
+export const BTN_SIGN_IN = "Sign in";
+
+/**
+ * Where a workspace lives. A separate origin from this site, so every link to
+ * it is a plain anchor, never a router link.
+ */
+export const LIVE_URL = "https://live.kerniva.app";
+export const LIVE_HOST = "live.kerniva.app";
 export const BTN_TALK_TO_SALES = "Talk to sales";
 
 export const CTA_DEFAULT = {
   title: "Kerniva is best experienced with real work",
-  body: "See how Kerniva fits your team’s material and workflow through a tailored session, or explore a live workspace when early access opens.",
+  body: "Book a demo, then sign up at live.kerniva.app with the same email. You get a fresh workspace of your own to try on your team’s material.",
 } as const;
 
 export const CTA_RESEARCH = {
@@ -79,7 +87,7 @@ export const HOME_HERO = {
   line1: "Multiplayer AI workspace for teams",
   line2: "to create complex deliverables",
   lede: "Kerniva connects your team’s research, files, AI sessions, and project decisions in real time, so the next collaborator can continue without reconstructing context.",
-  primary: "Join the design-partner program",
+  primary: "Book a demo",
   secondary: "See how it works",
 } as const;
 
@@ -383,8 +391,8 @@ export const FAQ = [
     q: "How do we get started?",
     a: (
       <>
-        Join the waitlist for a workspace of your own, or <Link to="/demo">book a demo</Link> and we
-        will walk through it on your team’s real work in 30 minutes.
+        <Link to="/demo">Book a demo</Link>, then sign up at <a href={LIVE_URL}>{LIVE_HOST}</a> with
+        the same email. You get a fresh workspace of your own to try on your team’s real work.
       </>
     ),
   },
@@ -395,7 +403,7 @@ export const FAQ = [
 export const HOME_NEXT_STEP = {
   eyebrow: "08 · The next step",
   title: "See Kerniva on your team’s own work",
-  lede: "A 30-minute walkthrough on a real project, or a place in the queue for a workspace of your own.",
+  lede: "Book a demo, then sign up at live.kerniva.app with the same email for a fresh workspace of your own.",
 } as const;
 
 /* ------------------------------------------------------------- product --- */
@@ -637,7 +645,7 @@ export const ABOUT_PAGE = {
 export const PRIVACY_PAGE = {
   eyebrow: "Privacy",
   title: "What the simulation does with your data.",
-  lede: "The public simulation (currently behind a waitlist) is a real Kerniva workspace that is deliberately disposable. This note says exactly what will be stored, for how long, and who can see it when it opens.",
+  lede: "The public simulation is a real Kerniva workspace that is deliberately disposable. This note says exactly what is stored, for how long, and who can see it.",
   enterpriseNote: "Looking for the enterprise posture: SSO, residency, audit? See",
   enterpriseLink: "Security",
 } as const;
@@ -707,56 +715,21 @@ export const CONTACT_INTERESTS: readonly { value: ContactInterest; label: string
   { value: "other", label: "Something else" },
 ];
 
-/* ------------------------------------------------------------ waitlist --- */
-
-export const WAITLIST_PAGE = {
-  eyebrow: "Early access",
-  title: "The live simulation is almost ready.",
-  lede: "Try Kerniva will give you a real workspace of your own: upload a document, ask the brain, drive a Relay session, approve an artifact. We are opening it in small waves. Leave your email and you will get access in the next one.",
-  getTitle: "What you will get",
-  getPoints: [
-    "A clean project with a sample library, just for you, no account needed",
-    "The real product: Relay, Library, proposals, Cockpit, the event log",
-    "A generous model budget for a full guided session",
-    "Everything disposable: your sandbox is wiped when it ends",
-  ],
-  impatient:
-    "Can't wait? A working session with the team is the fastest way to see Kerniva on your own material:",
-} as const;
-
-export const WAITLIST_FORM = {
-  sent: "You are on the list. We will write to you when the simulation opens.",
-  name: "Name",
-  email: "Work email",
-  org: "Organization",
-  work: "What kind of work does your team do?",
-  note: "One email when access opens. No newsletter, no sharing.",
-  submitting: "Joining…",
-} as const;
-
-/** `value` is submitted with the form; changing a label must not change it. */
-export const WAITLIST_WORK_KINDS: readonly { value: WaitlistWork; label: string }[] = [
-  { value: "consulting", label: "Consulting and advisory" },
-  { value: "research", label: "Research" },
-  { value: "product", label: "Product and project work" },
-  { value: "other", label: "Other" },
-];
-
 /* ---------------------------------------------------------------- demo --- */
 
 export const DEMO_PAGE = {
   back: "← Back to site",
-  waitlistInstead: "Join the waitlist instead",
   /** Two lines, because the second is styled as an accent. */
-  line1: "Join the design-partner program.",
+  line1: "Get a live Kerniva workspace.",
   line2: "Bring a real project.",
-  lede: "Thirty minutes, on your team’s own work. We will show how research, files, AI sessions, and decisions stay connected, so the next collaborator never starts over.",
+  lede: "Tell us who you are, then sign up at live.kerniva.app with the same email for a fresh workspace of your own. Bring your team’s material and see how research, files, AI sessions, and decisions stay connected, so the next collaborator never starts over.",
   plateTitle: "Demo request",
   plateRef: "KV-01",
-  plateLength: "30 min",
+  plateLength: "Self-serve",
   bookedTitle: "Request received",
   bookedBody:
-    "Check your inbox for a calendar link. In the meantime, you can put your team in the queue for a workspace of your own.",
+    "Your request reached the team. Open live.kerniva.app and sign up with the same email address to start a fresh workspace of your own.",
+  openLive: "Open live.kerniva.app",
   backToSite: "Back to site",
   name: "Name",
   namePlaceholder: "Ada Torres",
@@ -765,31 +738,31 @@ export const DEMO_PAGE = {
   company: "Company",
   companyPlaceholder: "Acme Studio",
   teamSize: "Team size",
-  notes: "What should we focus on?",
+  notes: "What will you use it for?",
   notesOptional: "(optional)",
   notesPlaceholder: "e.g. handoffs between our research and design teams",
   submit: "Book my demo",
   submitting: "Sending…",
   finePrint:
-    "We reply within one business day with a calendar link. No mailing list, no follow-up sequence.",
-  slots: "Live slots this week · Tue to Fri, 9:00 to 17:00 CET",
+    "Use this same address to sign up at live.kerniva.app. No mailing list, no follow-up sequence.",
+  slots: "Workspaces are live · live.kerniva.app",
 } as const;
 
 export const DEMO_PROMISES = [
   {
     n: "01",
-    title: "A walkthrough, not a pitch",
-    body: "We set up a workspace live and run a handoff end to end.",
+    title: "A workspace of your own",
+    body: "Signing up opens a fresh workspace for you. Nothing in it is shared with other teams.",
   },
   {
     n: "02",
-    title: "Your stack, your questions",
-    body: "Tell us what your team uses and we will show how it connects.",
+    title: "The real product",
+    body: "Relay, Library, proposals, and the project log, running live. Not a recording and not a mock-up.",
   },
   {
     n: "03",
-    title: "Leave with a workspace",
-    body: "Your trial project stays live after the call, so you can keep working in it.",
+    title: "No password to set",
+    body: "Sign up at live.kerniva.app with the email you give us here. You sign in with a code sent to that address.",
   },
 ] as const;
 

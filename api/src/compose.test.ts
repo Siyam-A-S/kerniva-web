@@ -59,7 +59,6 @@ describe("routing", () => {
     expect(routeFor("contact", { interest: "security" })).toBe("security@kerniva.app");
     expect(routeFor("contact", { interest: "research" })).toBe("contact@kerniva.app");
     expect(routeFor("contact", {})).toBe("contact@kerniva.app");
-    expect(routeFor("waitlist", {})).toBe("contact@kerniva.app");
     expect(routeFor("demo", {})).toBe("sales@kerniva.app");
   });
 });
@@ -95,7 +94,6 @@ describe("composeConfirmation", () => {
     org: `${SENTINEL} org`,
     company: `${SENTINEL} company`,
     interest: "security",
-    work: "research",
     teamSize: "200+",
     message: `${SENTINEL} http://evil.example/ buy now`,
     notes: `${SENTINEL} notes`,
@@ -126,12 +124,12 @@ describe("composeConfirmation", () => {
   it.each(["", "not-an-address", "a@b.com\r\nBcc: x@y.com", "a@b.com, c@d.com"])(
     "sends nothing when the address is %j",
     (email) => {
-      expect(composeConfirmation("waitlist", { ...hostile, email }, FROM)).toBeNull();
+      expect(composeConfirmation("demo", { ...hostile, email }, FROM)).toBeNull();
     },
   );
 
   it("sends nothing when there is no address at all", () => {
-    expect(composeConfirmation("waitlist", { name: "Ada" }, FROM)).toBeNull();
+    expect(composeConfirmation("demo", { name: "Ada" }, FROM)).toBeNull();
   });
 });
 

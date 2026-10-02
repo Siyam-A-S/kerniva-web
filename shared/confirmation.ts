@@ -32,22 +32,12 @@ export const CONFIRMATIONS: Record<FormKind, Confirmation> = {
       SIGN_OFF,
     ].join("\n"),
   },
-  waitlist: {
-    subject: "You are on the Kerniva waitlist",
-    body: [
-      "Thank you for joining the Kerniva waitlist.",
-      "",
-      "We will write to this address when access opens.",
-      "",
-      SIGN_OFF,
-    ].join("\n"),
-  },
   demo: {
     subject: "We received your demo request",
     body: [
-      "Thank you for asking for a Kerniva demo.",
+      "Thank you for booking a Kerniva demo.",
       "",
-      "Your request reached the team, and someone will reply to this address to arrange a time.",
+      "Your request reached the team. To start a fresh workspace of your own, sign up at https://live.kerniva.app with this same email address.",
       "",
       SIGN_OFF,
     ].join("\n"),

@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { AnimatePresence, motion, spring } from "motion/react";
 import { Logo } from "./logo";
 import { Corners } from "./blueprint";
 import { SectionLink } from "./section-link";
 import { riseIn } from "./transitions";
+import { BTN_SIGN_IN, LIVE_URL } from "../content";
 
 /**
  * Sticky, blurred bar over a hairline. Every entry points at a section of the
@@ -37,7 +38,6 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
-  const { pathname } = useLocation();
   const headerRef = useRef<HTMLElement | null>(null);
   const close = () => setOpen(false);
 
@@ -81,14 +81,10 @@ export function SiteHeader() {
         </nav>
 
         <div className="header-actions">
-          <Link
-            to="/waitlist"
-            className="btn btn--primary blueprint btn--hide-xs"
-            aria-current={pathname === "/waitlist" ? "page" : undefined}
-          >
-            <Corners />
-            Join the waitlist
-          </Link>
+          {/* The workspace is another origin: a plain anchor, not a router link. */}
+          <a href={LIVE_URL} className="btn btn--ghost btn--hide-xs">
+            {BTN_SIGN_IN}
+          </a>
           <Link to="/contact" className="btn btn--secondary btn--tinted btn--hide-sm">
             Talk to sales
           </Link>
