@@ -18,7 +18,7 @@ COPY shared/ shared/
 COPY api/ api/
 RUN cd api && pnpm build && pnpm prune --prod
 
-FROM nginx:1.27-alpine
+FROM nginx:1.31-alpine
 # nodejs only: nodemailer is pure JavaScript, so the modules built on Debian
 # above carry over to musl untouched.
 RUN apk add --no-cache nodejs
