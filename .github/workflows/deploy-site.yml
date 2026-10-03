@@ -43,7 +43,7 @@ jobs:
     # token, whatever its workflow file says.
     environment: site
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
@@ -51,11 +51,11 @@ jobs:
         id: sha
         run: echo "sha=${{ github.event.workflow_run.head_sha || github.sha }}" >> "$GITHUB_OUTPUT"
 
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
 
       # These three are identifiers, not credentials. They are environment
       # secrets only so they stay out of logs.
-      - uses: azure/login@v2
+      - uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -68,7 +68,7 @@ jobs:
       # Tagged by commit, never `latest`: a deploy names an exact image, so a
       # rollback is a real coordinate rather than whatever `latest` meant.
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true
