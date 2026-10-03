@@ -296,7 +296,7 @@ export const HOME_SECURITY_CARDS = [
   {
     Icon: BotIcon,
     title: "AI data handling",
-    body: "Single-egress AI gateway with zero-retention agreements. Prompts, sources, and model responses are excluded from logs and telemetry.",
+    body: "Single-egress AI gateway. Prompts, sources, and model responses are excluded from logs and telemetry.",
   },
   {
     Icon: TiersIcon,
@@ -447,7 +447,7 @@ export const PRODUCT_SURFACES = [
   {
     name: "Ask & Chat",
     tag: "AI surface",
-    body: "A grounded loop over your library with tool exposure scoped by role and project. Model traffic leaves through one gateway with zero retention; prompts and responses are never written to telemetry.",
+    body: "A grounded loop over your library with tool exposure scoped by role and project. Model traffic leaves through one gateway; prompts and responses are never written to telemetry.",
   },
   {
     name: "Artifacts",
@@ -558,7 +558,7 @@ export const SECURITY_CONTROLS = [
   ],
   [
     "AI data handling",
-    "Single-egress AI gateway with zero-retention agreements. Prompts, sources, and model responses are excluded from logs and telemetry.",
+    "Single-egress AI gateway. Prompts, sources, and model responses are excluded from logs and telemetry.",
   ],
   [
     "Sensitivity tiers",

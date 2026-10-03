@@ -89,3 +89,28 @@ describe("the privacy page", () => {
     },
   );
 });
+
+// The product has no zero-retention agreement with its AI providers, and its
+// Privacy Notice says so. Only the privacy page may use the phrase, and only
+// to say that.
+describe("no page claims zero retention", () => {
+  for (const route of routes.filter((r) => r !== "/privacy")) {
+    it(route, () => {
+      const html = renderToString(
+        <MemoryRouter initialEntries={[route]}>
+          <App />
+        </MemoryRouter>,
+      );
+      expect(html.toLowerCase()).not.toMatch(/zero[- ]retention/);
+    });
+  }
+
+  it("the privacy page says there is no such agreement", () => {
+    const html = renderToString(
+      <MemoryRouter initialEntries={["/privacy"]}>
+        <App />
+      </MemoryRouter>,
+    );
+    expect(html).toContain("We do not have a zero-retention agreement");
+  });
+});
