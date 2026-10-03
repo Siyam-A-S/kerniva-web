@@ -1,7 +1,7 @@
 # kerniva.app static marketing site plus the form intake API. Both run in one
 # container, nginx on port 80 with the API behind it on loopback, so the
 # browser only ever talks to one origin and the CSP needs no exception.
-FROM node:24-bookworm-slim AS site
+FROM node:26-bookworm-slim AS site
 WORKDIR /site
 RUN corepack enable
 COPY package.json pnpm-lock.yaml ./
@@ -9,7 +9,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm build
 
-FROM node:24-bookworm-slim AS api
+FROM node:26-bookworm-slim AS api
 WORKDIR /build
 RUN corepack enable
 COPY api/package.json api/pnpm-lock.yaml api/
