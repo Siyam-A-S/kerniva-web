@@ -644,39 +644,89 @@ export const ABOUT_PAGE = {
 
 export const PRIVACY_PAGE = {
   eyebrow: "Privacy",
-  title: "What the simulation does with your data.",
-  lede: "The public simulation is a real Kerniva workspace that is deliberately disposable. This note says exactly what is stored, for how long, and who can see it.",
+  title: "What Kerniva does with your data.",
+  lede: "This page covers kerniva.app, the site you are reading. The live demo at live.kerniva.app has its own Privacy Notice, which you read and accept when you sign up; its main points are summarised here.",
+  siteEyebrow: "01 · This website",
+  siteTitle: "kerniva.app",
+  demoEyebrow: "02 · The live demo",
+  demoTitle: "live.kerniva.app",
+  demoIntro:
+    "A summary of the demo’s Privacy Notice as published on 2 October 2026. The notice itself is the full and binding text, and it is the one that changes first.",
+  noticeLink: "Read the full Privacy Notice",
+  termsLink: "Read the Demo Terms",
   enterpriseNote: "Looking for the enterprise posture: SSO, residency, audit? See",
   enterpriseLink: "Security",
 } as const;
 
-/** Keep in step with SANDBOX_PROMISE in the product monorepo's contracts. */
-export const PRIVACY_POINTS: Array<[string, string]> = [
+/** The product’s own notice and terms. Another origin, so plain anchors. */
+export const LIVE_PRIVACY_URL = `${LIVE_URL}/privacy`;
+export const LIVE_TERMS_URL = `${LIVE_URL}/terms`;
+
+/**
+ * What this site does. Every sentence here is a fact about this repository or
+ * its deployment (the forms API, nginx, infra/opentofu, index.html): change
+ * the behaviour and the sentence together.
+ */
+export const PRIVACY_SITE_POINTS: Array<[string, string]> = [
   [
-    "No account, one cookie",
-    "Opening the simulation sets a single HttpOnly cookie that identifies your sandbox. It carries no personal data and expires with the sandbox (two hours idle). We do not set analytics or advertising cookies.",
+    "No cookies, no analytics",
+    "This site sets no cookies and stores nothing in your browser. It runs no analytics, advertising, or tracking scripts. Cloudflare, which protects the site, may set a security cookie of its own if it needs to check that a request comes from a person.",
   ],
   [
-    "Your sandbox is yours alone",
-    "Each visit creates its own organisation and project in the database. Row-level security keeps sandboxes apart; nothing you upload or write is visible to other visitors or to the Kerniva team in the normal course of operation.",
+    "What the forms send",
+    "The contact and demo forms ask for your name and email address, and optionally your organisation, team size, and a message. Submitting one emails those details to the Kerniva team, and a short confirmation may be sent to the address you gave. The site keeps no database of submissions.",
   ],
   [
-    "Uploads are temporary",
-    "Files you upload stay in your sandbox only. They are deleted when the sandbox ends and the whole simulation (database, files, graphs) is rebuilt from scratch every night at 03:00 UTC. Please do not upload confidential material.",
+    "Technical logs",
+    "Each request is logged with its IP address, the page requested, and the browser type, to limit abuse and investigate faults. These logs are kept for 30 days. To stop the forms being misused, the server also holds your IP address for about an hour and a one-way hash of your email address for about a day, in memory only.",
   ],
   [
-    "Model calls",
-    "Questions and documents you choose to work with are sent to Google Vertex AI (Gemini) through our own proxy under zero-retention terms: they are not used to train models. We log only counts and sizes, never content.",
-  ],
-  [
-    "What we keep",
-    "Aggregate counters (sandboxes per day, model turns, tokens) and a one-way hash of your IP address for rate limiting. No emails, no names, no document text.",
-  ],
-  [
-    "Questions",
-    "Write to privacy@kerniva.app. For the product itself, hosted in your own AWS account, see the security page.",
+    "Who handles it",
+    "The site runs on Microsoft Azure in the United States, behind Cloudflare. Form emails are sent through Azure Communication Services and arrive in our Google Workspace mailboxes. Fonts are loaded from Google Fonts, so your browser contacts Google when a page loads.",
   ],
 ];
+
+/**
+ * A summary of the live demo’s Privacy Notice, not a second source of truth.
+ * The text it summarises is PRIVACY_NOTICE in
+ * ../kerniva-prod/packages/contracts/src/legal.ts (LEGAL_VERSION 2026-10-02).
+ * When that version changes, re-read it and update these cards and the date
+ * in PRIVACY_PAGE.demoIntro. Never state anything here the notice does not.
+ */
+export const PRIVACY_DEMO_POINTS: Array<[string, string]> = [
+  [
+    "An account, and no password",
+    "You sign in through Microsoft Entra with a one-time code sent to your email address, or with your Microsoft or Google account. We never see or store a password. We keep your email address, the name your sign-in account gives us, when you signed up, and when you were last active.",
+  ],
+  [
+    "Your workspace content",
+    "The documents you upload, the text taken out of them, the knowledge graph and search index built from that text, your messages, and the documents and decks the workspace produces. Colleagues you invite see what their access level allows. Kerniva staff who operate the demo can access workspace data when that is needed to keep it running, investigate abuse, or answer a request from you.",
+  ],
+  [
+    "AI models that see your content",
+    "Parts of your content are sent to Anthropic (Claude) for chat, drafting, designed decks, and building the knowledge graph, and to OpenAI for search by meaning. Both state that they do not use this content to train their models, and that they may keep requests for a limited period to monitor for abuse. We do not have a zero-retention agreement with either, so do not upload anything that must never leave your organisation.",
+  ],
+  [
+    "Deleted after 30 idle days",
+    "A workspace and everything in it is deleted automatically after 30 days in which no member has used it, and you can ask us to delete it sooner. After deletion, copies can remain in backups for up to 7 more days. Technical logs are kept for 30 days.",
+  ],
+  [
+    "Where it runs",
+    "The demo is hosted on Microsoft Azure in the Central US region. Anthropic and OpenAI process requests in the United States and may use other countries where they operate. If you are outside the United States, your data is transferred to and processed there.",
+  ],
+  [
+    "Not for sale, not for training",
+    "We do not sell your data, and we do not use your documents or messages to train AI models. The workspace uses no advertising cookies and no third-party analytics.",
+  ],
+];
+
+export const PRIVACY_CONTACT = {
+  title: "Questions and requests",
+  /** The address is rendered as a mailto link between the two halves. */
+  before: "To ask what we hold about you, to correct it, or to have it deleted, write to",
+  after: "from the address the data is under.",
+  email: "privacy@kerniva.app",
+} as const;
 
 /* ----------------------------------------------------------- not found --- */
 

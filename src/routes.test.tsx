@@ -66,3 +66,26 @@ it("nothing on the home page offers a waitlist", () => {
   expect(html.toLowerCase()).not.toContain("waitlist");
   expect(html).toContain('href="https://live.kerniva.app"');
 });
+
+describe("the privacy page", () => {
+  const html = renderToString(
+    <MemoryRouter initialEntries={["/privacy"]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+  it("covers this site and points at the live demo's own notice", () => {
+    expect(html).toContain('href="https://live.kerniva.app/privacy"');
+    expect(html).toContain('href="https://live.kerniva.app/terms"');
+    expect(html).toContain('href="mailto:privacy@kerniva.app"');
+  });
+
+  // The page used to describe a sandbox that no longer exists, on the wrong
+  // cloud and the wrong model provider. None of that may come back.
+  it.each(["sandbox", "simulation", "Vertex", "Gemini", "AWS", "03:00"])(
+    "no longer mentions %s",
+    (word) => {
+      expect(html).not.toContain(word);
+    },
+  );
+});
