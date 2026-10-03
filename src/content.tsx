@@ -281,7 +281,7 @@ export const HOME_SECURITY_CARDS = [
   {
     Icon: IdentityIcon,
     title: "Identity",
-    body: "AWS Cognito with SSO (SAML / OIDC), enforced MFA, and short-lived tokens. Refresh tokens never reach the browser.",
+    body: "Microsoft Entra ID with SSO (SAML / OIDC), enforced MFA, and short-lived tokens. Refresh tokens never reach the browser.",
   },
   {
     Icon: LockIcon,
@@ -311,12 +311,12 @@ export const HOME_SECURITY_CARDS = [
   {
     Icon: CodeIcon,
     title: "Application security",
-    body: "OWASP Top 10 program, strict CSP and secure headers, secrets in AWS Secrets Manager, dependency and container scanning in CI.",
+    body: "OWASP Top 10 program, strict CSP and secure headers, secrets held in Azure and never in code, dependency and container scanning in CI.",
   },
   {
     Icon: GlobeIcon,
     title: "Residency and isolation",
-    body: "Deploy in your AWS region or your own account. Nonproduction and production live in independent accounts with separate state.",
+    body: "Deploy in your Azure region or your own subscription. Nonproduction and production live in independent subscriptions with separate state.",
   },
 ] as const;
 
@@ -333,7 +333,7 @@ export const COMPANY_LEDE =
   "Kerniva started from a simple observation: the teams with the most to gain from AI are the ones least able to use consumer tools. We are building the workspace they can actually adopt.";
 
 export const COMPANY_WHERE =
-  "Kerniva is in private beta with design partners in enterprise strategy, advisory, and academic research. Production deployments run on AWS with manual release gates.";
+  "Kerniva is in private beta with design partners in enterprise strategy, advisory, and academic research. Production deployments run on Azure with manual release gates.";
 
 export const COMPANY_HIRING =
   "We are hiring engineers who care about governance, security, and the craft of dense, quiet interfaces.";
@@ -424,12 +424,12 @@ export const PRODUCT_PAGE = {
   ],
   deploymentTitle: "Deployment model",
   deploymentBody:
-    "Kerniva runs as a web workspace and a terminal CLI over the same governed HTTP API, hosted in your AWS account or ours.",
+    "Kerniva runs as a web workspace and a terminal CLI over the same governed HTTP API, hosted in your Azure subscription or ours.",
   deploymentPoints: [
-    "Web app on CloudFront + S3; API on ECS Fargate",
+    "Web app on Azure Static Web Apps; API on Azure Container Apps",
     "PostgreSQL with forced row-level security and pgvector",
     "FIFO ingestion queue with retries and dead-letter handling",
-    "Cognito for identity, SSO, and MFA",
+    "Microsoft Entra ID for identity, SSO, and MFA",
   ],
 } as const;
 
@@ -546,7 +546,7 @@ export const SECURITY_PAGE = {
 export const SECURITY_CONTROLS = [
   [
     "Identity",
-    "AWS Cognito with SSO (SAML / OIDC), enforced MFA, and short-lived tokens. Refresh tokens never reach the browser.",
+    "Microsoft Entra ID with SSO (SAML / OIDC), enforced MFA, and short-lived tokens. Refresh tokens never reach the browser.",
   ],
   [
     "Authorization",
@@ -567,11 +567,11 @@ export const SECURITY_CONTROLS = [
   ["Audit", "Append-only, tamper-evident event log with hash chaining and SIEM export."],
   [
     "Application security",
-    "OWASP Top 10 program, strict CSP and secure headers, secrets in AWS Secrets Manager, dependency and container scanning in CI.",
+    "OWASP Top 10 program, strict CSP and secure headers, secrets held in Azure and never in code, dependency and container scanning in CI.",
   ],
   [
     "Residency & isolation",
-    "Deploy in your AWS region or your own account. Nonproduction and production live in independent accounts with separate state.",
+    "Deploy in your Azure region or your own subscription. Nonproduction and production live in independent subscriptions with separate state.",
   ],
 ];
 
@@ -588,7 +588,7 @@ export const PRICING_PLANS = [
     name: "Team",
     price: "Contact us",
     period: "",
-    blurb: "For a single group running governed projects on Kerniva-hosted AWS.",
+    blurb: "For a single group running governed projects on Kerniva-hosted Azure.",
     items: [
       "Up to 25 seats",
       "Unlimited projects",
@@ -605,7 +605,7 @@ export const PRICING_PLANS = [
     blurb: "For organizations with security review, data residency, and connector needs.",
     items: [
       "Unlimited seats",
-      "Deploy in your AWS account or region",
+      "Deploy in your Azure subscription or region",
       "SharePoint and custom connectors",
       "Audit export to your SIEM",
       "Security questionnaire & architecture review",

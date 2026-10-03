@@ -114,3 +114,21 @@ describe("no page claims zero retention", () => {
     expect(html).toContain("We do not have a zero-retention agreement");
   });
 });
+
+// The product moved from AWS to Azure. The copy must not describe the old
+// stack anywhere. (The AWS partner mark in the backer strip is a different
+// kind of statement and is not what this checks.)
+describe("no page describes the product as running on AWS", () => {
+  const OLD_STACK =
+    /Cognito|CloudFront|ECS Fargate|Secrets Manager|AWS (account|region)|on AWS|hosted AWS/;
+  for (const route of routes) {
+    it(route, () => {
+      const html = renderToString(
+        <MemoryRouter initialEntries={[route]}>
+          <App />
+        </MemoryRouter>,
+      );
+      expect(html).not.toMatch(OLD_STACK);
+    });
+  }
+});
