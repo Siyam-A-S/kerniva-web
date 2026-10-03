@@ -1,0 +1,38 @@
+# Weekly update pull requests, grouped so one review covers a week's worth.
+# Merging one deploys it: every merge to main rolls the site once CI passes.
+# Security updates are separate from this schedule and open as soon as an
+# advisory is published.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      site:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  # The forms API is its own package with its own lockfile.
+  - package-ecosystem: npm
+    directory: /api
+    schedule:
+      interval: weekly
+    groups:
+      api:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # Base images in the Dockerfile (node, nginx).
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
